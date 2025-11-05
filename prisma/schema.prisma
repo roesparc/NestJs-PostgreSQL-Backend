@@ -16,6 +16,7 @@ model User {
     email      String   @unique
     username   String   @unique
     hash       String
+    is_active  Boolean  @default(true)
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
 
