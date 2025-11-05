@@ -1,6 +1,5 @@
 export interface JwtPayload {
   userId: number;
-  username: string;
 }
 
 export interface Login {
