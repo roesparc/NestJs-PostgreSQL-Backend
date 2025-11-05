@@ -21,31 +21,35 @@ async function main() {
   //#region Users
   const users = [
     {
-      name: 'Alice Johnson',
+      first_name: 'Alice',
+      last_name: 'Johnson',
       email: 'alice@example.com',
       username: 'alice',
-      password: 'alicejohnson123',
+      password: 'alice123',
       roles: ['ADMIN'],
     },
     {
-      name: 'Bob Smith',
+      first_name: 'Bob',
+      last_name: 'Smith',
       email: 'bob@example.com',
       username: 'bob',
-      password: 'bobsmith123',
+      password: 'bob123',
       roles: ['EDITOR'],
     },
     {
-      name: 'Charlie Davis',
+      first_name: 'Charlie',
+      last_name: 'Davis',
       email: 'charlie@example.com',
       username: 'charlie',
-      password: 'charliedavis123',
+      password: 'charlie123',
       roles: ['VIEWER'],
     },
     {
-      name: 'Diana Green',
+      first_name: 'Diana',
+      last_name: 'Green',
       email: 'diana@example.com',
       username: 'diana',
-      password: 'dianagreen123',
+      password: 'diana123',
       roles: ['EDITOR', 'VIEWER'],
     },
   ];
@@ -59,7 +63,8 @@ async function main() {
       where: { email: user.email },
       update: {},
       create: {
-        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name,
         email: user.email,
         username: user.username,
         hash: passwordHash,
