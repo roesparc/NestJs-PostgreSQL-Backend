@@ -10,13 +10,14 @@ datasource db {
 
 //#region AUTH SCHEMA
 model User {
-    id        Int      @id @default(autoincrement())
-    name      String
-    email     String   @unique
-    username  String   @unique
-    hash      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id         Int      @id @default(autoincrement())
+    first_name String   @db.VarChar(100)
+    last_name  String?  @db.VarChar(100)
+    email      String   @unique
+    username   String   @unique
+    hash       String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 
     roles    Role[]    @relation("user_role")
     projects Project[]
