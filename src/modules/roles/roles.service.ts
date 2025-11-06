@@ -1,0 +1,57 @@
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { CreateRoleDto, UpdateRoleDto } from "./dto/roles.dto";
+import { Role } from "@prisma/client";
+
+@Injectable()
+export class RolesService {
+  constructor(private prisma: PrismaService) {}
+
+  private static readonly resource: string = "Role";
+  private static readonly model = "role";
+
+  //#region CRUD
+  async create(payload: CreateRoleDto): Promise<Role> {
+    return this.prisma[RolesService.model].create({
+      data: payload,
+    });
+  }
+
+  async getAll(): Promise<Role[]> {
+    return this.prisma[RolesService.model].findMany();
+  }
+
+  async updateById(id: number, payload: UpdateRoleDto): Promise<Role> {
+    const entity = await this.prisma[RolesService.model].findUnique({
+      where: { id },
+    });
+
+    if (!entity) {
+      throw new NotFoundException(
+        `${RolesService.resource} with ID ${id} not found`
+      );
+    }
+
+    return this.prisma[RolesService.model].update({
+      where: { id },
+      data: payload,
+    });
+  }
+
+  async deleteById(id: number): Promise<Role> {
+    const entity = await this.prisma[RolesService.model].findUnique({
+      where: { id },
+    });
+
+    if (!entity) {
+      throw new NotFoundException(
+        `${RolesService.resource} with ID ${id} not found`
+      );
+    }
+
+    return this.prisma[RolesService.model].delete({
+      where: { id },
+    });
+  }
+  //#endregion
+}
