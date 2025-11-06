@@ -381,7 +381,7 @@ export class UsersController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles('ADMIN')
   @Patch('assign-role')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Assign role to user' })
@@ -427,7 +427,7 @@ export class UsersController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles('ADMIN')
   @Patch('remove-role')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Remove role from user' })
