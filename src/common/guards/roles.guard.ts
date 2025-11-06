@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RequestWithUser } from 'src/shared/interfaces/request.interface';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -13,11 +14,11 @@ export class RolesGuard implements CanActivate {
     const roles = this.reflector.get<string[]>('roles', context.getHandler());
     if (!roles) return true;
 
-    const request = context.switchToHttp().getRequest();
+    const request: RequestWithUser = context.switchToHttp().getRequest();
     const user = request.user;
 
     const dbUser = await this.prisma.user.findUnique({
-      where: { id: user.userId },
+      where: { id: user.id },
       include: { roles: true },
     });
 
