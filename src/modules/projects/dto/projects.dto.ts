@@ -76,7 +76,7 @@ export class UpdateProjectDto extends PartialType(
   OmitType(CreateProjectDto, ['userId'] as const),
 ) {}
 
-export class CheckSlugDto extends PickType(CreateProjectDto, [
+export class CheckProjectSlugDto extends PickType(CreateProjectDto, [
   'slug',
   'userId',
 ] as const) {}

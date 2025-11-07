@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
-  CheckSlugDto,
+  CheckProjectSlugDto,
   CreateProjectDto,
   UpdateProjectDto,
 } from './dto/projects.dto';
@@ -100,7 +100,7 @@ export class ProjectsService {
   //#endregion
 
   //#region Extras
-  async checkSlug(payload: CheckSlugDto): Promise<CheckSlugResponse> {
+  async checkSlug(payload: CheckProjectSlugDto): Promise<CheckSlugResponse> {
     const { slug, userId } = payload;
 
     const existing = await this.prisma[ProjectsService.model].findFirst({

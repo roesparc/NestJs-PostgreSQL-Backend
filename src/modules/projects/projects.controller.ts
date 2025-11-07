@@ -12,7 +12,7 @@ import { AppLogger } from '../../common/logger/logger.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import {
-  CheckSlugDto,
+  CheckProjectSlugDto,
   CreateProjectDto,
   UpdateProjectDto,
 } from './dto/projects.dto';
@@ -190,7 +190,7 @@ export class ProjectsController {
     status: 200,
     description: 'Slug availability result',
   })
-  async checkSlug(@Query() query: CheckSlugDto) {
+  async checkSlug(@Query() query: CheckProjectSlugDto) {
     try {
       const result = await this.resourceService.checkSlug(query);
 
