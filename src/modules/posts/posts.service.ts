@@ -1,16 +1,14 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import {
-  CheckPostSlugDto,
-  CreatePostDto,
-  UpdatePostDto,
-} from './dto/posts.dto';
+import { CreatePostDto, UpdatePostDto } from './dto/posts.dto';
 import { Post } from '@prisma/client';
-import { CheckSlugResponse } from 'src/shared/interfaces/slug.interface';
+import { CheckSlugDto } from '../../shared/dto/slug.dto';
+import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
 
 @Injectable()
 export class PostsService {
@@ -20,8 +18,8 @@ export class PostsService {
   private static readonly model = 'post';
 
   //#region CRUD
-  async create(payload: CreatePostDto): Promise<Post> {
-    const { slug, authorId, ...rest } = payload;
+  async create(authorId: number, payload: CreatePostDto): Promise<Post> {
+    const { slug, ...rest } = payload;
 
     const existingSlug = await this.prisma[PostsService.model].findFirst({
       where: { slug, authorId },
@@ -46,7 +44,11 @@ export class PostsService {
     return this.prisma[PostsService.model].findMany();
   }
 
-  async updateById(id: number, payload: UpdatePostDto): Promise<Post> {
+  async updateById(
+    id: number,
+    authorId: number,
+    payload: UpdatePostDto,
+  ): Promise<Post> {
     const entity = await this.prisma[PostsService.model].findUnique({
       where: { id },
     });
@@ -54,6 +56,12 @@ export class PostsService {
     if (!entity) {
       throw new NotFoundException(
         `${PostsService.resource} with ID ${id} not found`,
+      );
+    }
+
+    if (entity.authorId !== authorId) {
+      throw new ForbiddenException(
+        `You do not have permission to update this ${PostsService.resource}.`,
       );
     }
 
@@ -98,8 +106,11 @@ export class PostsService {
   //#endregion
 
   //#region Extras
-  async checkSlug(payload: CheckPostSlugDto): Promise<CheckSlugResponse> {
-    const { slug, authorId } = payload;
+  async checkSlug(
+    authorId: number,
+    query: CheckSlugDto,
+  ): Promise<CheckSlugResponse> {
+    const { slug } = query;
 
     const existing = await this.prisma[PostsService.model].findFirst({
       where: { slug, authorId },

@@ -1,8 +1,6 @@
-import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -39,22 +37,6 @@ export class CreatePostDto {
     required: false,
   })
   published?: boolean;
-
-  @IsNotEmpty()
-  @IsInt()
-  @Type(() => Number)
-  @ApiProperty({
-    example: 1,
-    required: true,
-  })
-  authorId!: number;
 }
 
-export class UpdatePostDto extends PartialType(
-  OmitType(CreatePostDto, ['authorId'] as const),
-) {}
-
-export class CheckPostSlugDto extends PickType(CreatePostDto, [
-  'slug',
-  'authorId',
-] as const) {}
+export class UpdatePostDto extends PartialType(CreatePostDto) {}

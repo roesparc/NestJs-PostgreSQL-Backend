@@ -7,16 +7,15 @@ import {
   Patch,
   Post,
   Query,
+  Request,
 } from '@nestjs/common';
 import { AppLogger } from '../../common/logger/logger.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
-import {
-  CheckProjectSlugDto,
-  CreateProjectDto,
-  UpdateProjectDto,
-} from './dto/projects.dto';
+import { CreateProjectDto, UpdateProjectDto } from './dto/projects.dto';
 import { IdParamDto } from '../../shared/dto/id-param.dto';
+import type { RequestWithUser } from '../../shared/interfaces/request.interface';
+import { CheckSlugDto } from '../../shared/dto/slug.dto';
 
 @Controller('projects')
 export class ProjectsController {
@@ -35,14 +34,18 @@ export class ProjectsController {
     status: 201,
     description: `${ProjectsController.resource} created successfully`,
   })
-  async create(@Body() payload: CreateProjectDto) {
+  async create(
+    @Request() req: RequestWithUser,
+    @Body() payload: CreateProjectDto,
+  ) {
     try {
-      const entity = await this.resourceService.create(payload);
+      const entity = await this.resourceService.create(req.user.id, payload);
 
       this.logger.log({
         event: 'create',
         status: 'success',
         resource: ProjectsController.resource,
+        userId: req.user.id,
         payload,
       });
 
@@ -56,6 +59,7 @@ export class ProjectsController {
         event: 'create',
         status: 'error',
         resource: ProjectsController.resource,
+        userId: req.user.id,
         payload,
       });
 
@@ -108,17 +112,23 @@ export class ProjectsController {
     description: `${ProjectsController.resource} not found`,
   })
   async updateById(
+    @Request() req: RequestWithUser,
     @Param() params: IdParamDto,
     @Body() payload: UpdateProjectDto,
   ) {
     try {
-      const entity = await this.resourceService.updateById(params.id, payload);
+      const entity = await this.resourceService.updateById(
+        params.id,
+        req.user.id,
+        payload,
+      );
 
       this.logger.log({
         event: 'updateById',
         status: 'success',
         resource: ProjectsController.resource,
         id: params.id,
+        userId: req.user.id,
         payload,
       });
 
@@ -133,6 +143,7 @@ export class ProjectsController {
         status: 'error',
         resource: ProjectsController.resource,
         id: params.id,
+        userId: req.user.id,
         payload,
       });
 
@@ -190,15 +201,19 @@ export class ProjectsController {
     status: 200,
     description: 'Slug availability result',
   })
-  async checkSlug(@Query() query: CheckProjectSlugDto) {
+  async checkSlug(
+    @Request() req: RequestWithUser,
+    @Query() query: CheckSlugDto,
+  ) {
     try {
-      const result = await this.resourceService.checkSlug(query);
+      const result = await this.resourceService.checkSlug(req.user.id, query);
 
       this.logger.log({
         event: 'check-slug',
         status: 'success',
         resource: ProjectsController.resource,
-        payload: query,
+        userId: req.user.id,
+        query,
         result,
       });
 
@@ -212,7 +227,8 @@ export class ProjectsController {
         event: 'check-slug',
         status: 'error',
         resource: ProjectsController.resource,
-        payload: query,
+        userId: req.user.id,
+        query,
       });
 
       throw error;

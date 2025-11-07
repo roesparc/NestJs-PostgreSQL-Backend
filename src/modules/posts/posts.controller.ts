@@ -7,16 +7,15 @@ import {
   Patch,
   Post,
   Query,
+  Request,
 } from '@nestjs/common';
 import { AppLogger } from '../../common/logger/logger.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { IdParamDto } from '../../shared/dto/id-param.dto';
 import { PostsService } from './posts.service';
-import {
-  CheckPostSlugDto,
-  CreatePostDto,
-  UpdatePostDto,
-} from './dto/posts.dto';
+import { CreatePostDto, UpdatePostDto } from './dto/posts.dto';
+import type { RequestWithUser } from '../../shared/interfaces/request.interface';
+import { CheckSlugDto } from '../../shared/dto/slug.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -35,14 +34,18 @@ export class PostsController {
     status: 201,
     description: `${PostsController.resource} created successfully`,
   })
-  async create(@Body() payload: CreatePostDto) {
+  async create(
+    @Request() req: RequestWithUser,
+    @Body() payload: CreatePostDto,
+  ) {
     try {
-      const entity = await this.resourceService.create(payload);
+      const entity = await this.resourceService.create(req.user.id, payload);
 
       this.logger.log({
         event: 'create',
         status: 'success',
         resource: PostsController.resource,
+        userId: req.user.id,
         payload,
       });
 
@@ -56,6 +59,7 @@ export class PostsController {
         event: 'create',
         status: 'error',
         resource: PostsController.resource,
+        userId: req.user.id,
         payload,
       });
 
@@ -108,17 +112,23 @@ export class PostsController {
     description: `${PostsController.resource} not found`,
   })
   async updateById(
+    @Request() req: RequestWithUser,
     @Param() params: IdParamDto,
     @Body() payload: UpdatePostDto,
   ) {
     try {
-      const entity = await this.resourceService.updateById(params.id, payload);
+      const entity = await this.resourceService.updateById(
+        req.user.id,
+        params.id,
+        payload,
+      );
 
       this.logger.log({
         event: 'updateById',
         status: 'success',
         resource: PostsController.resource,
         id: params.id,
+        userId: req.user.id,
         payload,
       });
 
@@ -133,6 +143,7 @@ export class PostsController {
         status: 'error',
         resource: PostsController.resource,
         id: params.id,
+        userId: req.user.id,
         payload,
       });
 
@@ -190,15 +201,19 @@ export class PostsController {
     status: 200,
     description: 'Slug availability result',
   })
-  async checkSlug(@Query() query: CheckPostSlugDto) {
+  async checkSlug(
+    @Request() req: RequestWithUser,
+    @Query() query: CheckSlugDto,
+  ) {
     try {
-      const result = await this.resourceService.checkSlug(query);
+      const result = await this.resourceService.checkSlug(req.user.id, query);
 
       this.logger.log({
         event: 'check-slug',
         status: 'success',
         resource: PostsController.resource,
-        payload: query,
+        userId: req.user.id,
+        query,
         result,
       });
 
@@ -212,7 +227,8 @@ export class PostsController {
         event: 'check-slug',
         status: 'error',
         resource: PostsController.resource,
-        payload: query,
+        userId: req.user.id,
+        query,
       });
 
       throw error;
