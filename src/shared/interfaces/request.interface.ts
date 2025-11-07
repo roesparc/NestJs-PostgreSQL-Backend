@@ -1,6 +1,10 @@
 import { Request } from 'express';
-import { UserWithoutHash } from '../../modules/users/interfaces/users.interface';
+import { Role, User } from '@prisma/client';
+
+export interface ReqUser extends Omit<User, 'hash'> {
+  roles: Role[];
+}
 
 export interface RequestWithUser extends Request {
-  user: UserWithoutHash;
+  user: ReqUser;
 }
