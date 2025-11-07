@@ -4,23 +4,17 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import { AppLogger } from '../../common/logger/logger.service';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateRoleDto, UpdateRoleDto } from './dto/roles.dto';
 import { RolesService } from './roles.service';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { IdParamDto } from '../../shared/dto/id-param.dto';
 
 @Controller('roles')
 export class RolesController {
@@ -41,7 +35,6 @@ export class RolesController {
     status: 201,
     description: `${RolesController.resource} created successfully`,
   })
-  @ApiBody({ type: CreateRoleDto })
   async create(@Body() payload: CreateRoleDto) {
     try {
       const entity = await this.resourceService.create(payload);
@@ -110,12 +103,6 @@ export class RolesController {
   @Patch('id/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: `Update ${RolesController.resource} by ID` })
-  @ApiParam({
-    name: 'id',
-    type: 'number',
-    description: `${RolesController.resource} ID`,
-  })
-  @ApiBody({ type: UpdateRoleDto })
   @ApiResponse({
     status: 200,
     description: `${RolesController.resource} updated successfully`,
@@ -125,17 +112,17 @@ export class RolesController {
     description: `${RolesController.resource} not found`,
   })
   async updateById(
-    @Param('id', ParseIntPipe) id: number,
+    @Param() params: IdParamDto,
     @Body() payload: UpdateRoleDto,
   ) {
     try {
-      const entity = await this.resourceService.updateById(id, payload);
+      const entity = await this.resourceService.updateById(params.id, payload);
 
       this.logger.log({
         event: 'updateById',
         status: 'success',
         resource: RolesController.resource,
-        id,
+        id: params.id,
         payload,
       });
 
@@ -149,7 +136,7 @@ export class RolesController {
         event: 'updateById',
         status: 'error',
         resource: RolesController.resource,
-        id,
+        id: params.id,
         payload,
       });
 
@@ -162,11 +149,6 @@ export class RolesController {
   @Delete('id/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: `Delete ${RolesController.resource} by ID` })
-  @ApiParam({
-    name: 'id',
-    type: 'number',
-    description: `${RolesController.resource} ID`,
-  })
   @ApiResponse({
     status: 200,
     description: `${RolesController.resource} deleted successfully`,
@@ -175,15 +157,15 @@ export class RolesController {
     status: 404,
     description: `${RolesController.resource} not found`,
   })
-  async deleteById(@Param('id', ParseIntPipe) id: number) {
+  async deleteById(@Param() params: IdParamDto) {
     try {
-      const entity = await this.resourceService.deleteById(id);
+      const entity = await this.resourceService.deleteById(params.id);
 
       this.logger.log({
         event: 'delete',
         status: 'success',
         resource: RolesController.resource,
-        id,
+        id: params.id,
       });
 
       return entity;
@@ -196,7 +178,7 @@ export class RolesController {
         event: 'delete',
         status: 'error',
         resource: RolesController.resource,
-        id,
+        id: params.id,
       });
 
       throw error;

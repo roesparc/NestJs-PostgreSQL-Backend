@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Request,
@@ -15,13 +14,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import type { RequestWithUser } from '../../shared/interfaces/request.interface';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   CreateUserDto,
   UpdateUserDto,
@@ -29,6 +22,7 @@ import {
   UserRoleDto,
 } from './dto/users.dto';
 import { UsersService } from './users.service';
+import { IdParamDto } from '../../shared/dto/id-param.dto';
 
 @Controller('users')
 export class UsersController {
@@ -47,7 +41,6 @@ export class UsersController {
     status: 201,
     description: `${UsersController.resource} created successfully`,
   })
-  @ApiBody({ type: CreateUserDto })
   async create(@Body() payload: CreateUserDto) {
     try {
       const entity = await this.resourceService.create(payload);
@@ -112,12 +105,6 @@ export class UsersController {
   @Patch('id/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: `Update ${UsersController.resource} by ID` })
-  @ApiParam({
-    name: 'id',
-    type: 'number',
-    description: `${UsersController.resource} ID`,
-  })
-  @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
     status: 200,
     description: `${UsersController.resource} updated successfully`,
@@ -127,17 +114,17 @@ export class UsersController {
     description: `${UsersController.resource} not found`,
   })
   async updateById(
-    @Param('id', ParseIntPipe) id: number,
+    @Param() params: IdParamDto,
     @Body() payload: UpdateUserDto,
   ) {
     try {
-      const entity = await this.resourceService.updateById(id, payload);
+      const entity = await this.resourceService.updateById(params.id, payload);
 
       this.logger.log({
         event: 'updateById',
         status: 'success',
         resource: UsersController.resource,
-        id,
+        id: params.id,
         payload,
       });
 
@@ -151,7 +138,7 @@ export class UsersController {
         event: 'updateById',
         status: 'error',
         resource: UsersController.resource,
-        id,
+        id: params.id,
         payload,
       });
 
@@ -162,11 +149,6 @@ export class UsersController {
   @Delete('id/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: `Delete ${UsersController.resource} by ID` })
-  @ApiParam({
-    name: 'id',
-    type: 'number',
-    description: `${UsersController.resource} ID`,
-  })
   @ApiResponse({
     status: 200,
     description: `${UsersController.resource} deleted successfully`,
@@ -175,15 +157,15 @@ export class UsersController {
     status: 404,
     description: `${UsersController.resource} not found`,
   })
-  async deleteById(@Param('id', ParseIntPipe) id: number) {
+  async deleteById(@Param() params: IdParamDto) {
     try {
-      const entity = await this.resourceService.deleteById(id);
+      const entity = await this.resourceService.deleteById(params.id);
 
       this.logger.log({
         event: 'delete',
         status: 'success',
         resource: UsersController.resource,
-        id,
+        id: params.id,
       });
 
       return entity;
@@ -196,7 +178,7 @@ export class UsersController {
         event: 'delete',
         status: 'error',
         resource: UsersController.resource,
-        id,
+        id: params.id,
       });
 
       throw error;
@@ -208,11 +190,6 @@ export class UsersController {
   @Get('id/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: `Get ${UsersController.resource} by ID` })
-  @ApiParam({
-    name: 'id',
-    type: 'number',
-    description: `${UsersController.resource} ID`,
-  })
   @ApiResponse({
     status: 200,
     description: `${UsersController.resource} retrieved successfully`,
@@ -221,15 +198,15 @@ export class UsersController {
     status: 404,
     description: `${UsersController.resource} not found`,
   })
-  async getById(@Param('id', ParseIntPipe) id: number) {
+  async getById(@Param() params: IdParamDto) {
     try {
-      const entity = await this.resourceService.getById(id);
+      const entity = await this.resourceService.getById(params.id);
 
       this.logger.log({
         event: 'getById',
         status: 'success',
         resource: UsersController.resource,
-        id,
+        id: params.id,
       });
 
       return entity;
@@ -242,7 +219,7 @@ export class UsersController {
         event: 'getById',
         status: 'error',
         resource: UsersController.resource,
-        id,
+        id: params.id,
       });
 
       throw error;
@@ -252,11 +229,6 @@ export class UsersController {
   @Get('username/:username')
   @ApiBearerAuth()
   @ApiOperation({ summary: `Get ${UsersController.resource} by username` })
-  @ApiParam({
-    name: 'username',
-    type: 'string',
-    description: 'Username',
-  })
   @ApiResponse({
     status: 200,
     description: `${UsersController.resource} retrieved successfully`,
@@ -335,12 +307,6 @@ export class UsersController {
   @Patch('update-password/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: `Update ${UsersController.resource} password` })
-  @ApiParam({
-    name: 'id',
-    type: 'number',
-    description: `${UsersController.resource} ID`,
-  })
-  @ApiBody({ type: UpdateUserPasswordDto })
   @ApiResponse({
     status: 200,
     description: `${UsersController.resource} password updated successfully`,
@@ -350,17 +316,20 @@ export class UsersController {
     description: `${UsersController.resource} not found`,
   })
   async updatePassword(
-    @Param('id', ParseIntPipe) id: number,
+    @Param() params: IdParamDto,
     @Body() payload: UpdateUserPasswordDto,
   ) {
     try {
-      const entity = await this.resourceService.updatePassword(id, payload);
+      const entity = await this.resourceService.updatePassword(
+        params.id,
+        payload,
+      );
 
       this.logger.log({
         event: 'updatePassword',
         status: 'success',
         resource: UsersController.resource,
-        id,
+        id: params.id,
       });
 
       return entity;
@@ -373,7 +342,7 @@ export class UsersController {
         event: 'updatePassword',
         status: 'error',
         resource: UsersController.resource,
-        id,
+        id: params.id,
       });
 
       throw error;
@@ -385,7 +354,6 @@ export class UsersController {
   @Patch('assign-role')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Assign role to user' })
-  @ApiBody({ type: UserRoleDto })
   @ApiResponse({
     status: 200,
     description: 'Role assigned to user successfully',
@@ -431,7 +399,6 @@ export class UsersController {
   @Patch('remove-role')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Remove role from user' })
-  @ApiBody({ type: UserRoleDto })
   @ApiResponse({
     status: 200,
     description: 'Role removed from user successfully',
