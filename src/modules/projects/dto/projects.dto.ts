@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -72,7 +72,9 @@ export class CreateProjectDto {
   userId!: number;
 }
 
-export class UpdateProjectDto extends PartialType(CreateProjectDto) {}
+export class UpdateProjectDto extends PartialType(
+  OmitType(CreateProjectDto, ['userId'] as const),
+) {}
 
 export class CheckSlugDto extends PickType(CreateProjectDto, [
   'slug',
