@@ -9,6 +9,7 @@ import { CreatePostDto, UpdatePostDto } from './dto/posts.dto';
 import { Post } from '@prisma/client';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
+import { ReqUser } from '../../shared/interfaces/request.interface';
 
 @Injectable()
 export class PostsService {
@@ -88,7 +89,7 @@ export class PostsService {
     });
   }
 
-  async deleteById(id: number): Promise<Post> {
+  async deleteById(id: number, user: ReqUser): Promise<Post> {
     const entity = await this.prisma[PostsService.model].findUnique({
       where: { id },
     });
@@ -96,6 +97,14 @@ export class PostsService {
     if (!entity) {
       throw new NotFoundException(
         `${PostsService.resource} with ID ${id} not found`,
+      );
+    }
+
+    const isUserAdmin = user.roles.some((role) => role.name === 'ADMIN');
+
+    if (entity.authorId !== user.id && !isUserAdmin) {
+      throw new ForbiddenException(
+        `You do not have permission to delete this ${PostsService.resource}`,
       );
     }
 

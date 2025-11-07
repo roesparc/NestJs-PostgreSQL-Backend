@@ -162,15 +162,19 @@ export class ProjectsController {
     status: 404,
     description: `${ProjectsController.resource} not found`,
   })
-  async deleteById(@Param() params: IdParamDto) {
+  async deleteById(
+    @Request() req: RequestWithUser,
+    @Param() params: IdParamDto,
+  ) {
     try {
-      const entity = await this.resourceService.deleteById(params.id);
+      const entity = await this.resourceService.deleteById(params.id, req.user);
 
       this.logger.log({
         event: 'delete',
         status: 'success',
         resource: ProjectsController.resource,
         id: params.id,
+        actorId: req.user.id,
       });
 
       return entity;
@@ -184,6 +188,7 @@ export class ProjectsController {
         status: 'error',
         resource: ProjectsController.resource,
         id: params.id,
+        actorId: req.user.id,
       });
 
       throw error;

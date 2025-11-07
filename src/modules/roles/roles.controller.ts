@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { AppLogger } from '../../common/logger/logger.service';
@@ -15,6 +16,7 @@ import { RolesService } from './roles.service';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { IdParamDto } from '../../shared/dto/id-param.dto';
+import type { RequestWithUser } from '../../shared/interfaces/request.interface';
 
 @Controller('roles')
 export class RolesController {
@@ -157,15 +159,19 @@ export class RolesController {
     status: 404,
     description: `${RolesController.resource} not found`,
   })
-  async deleteById(@Param() params: IdParamDto) {
+  async deleteById(
+    @Request() req: RequestWithUser,
+    @Param() params: IdParamDto,
+  ) {
     try {
-      const entity = await this.resourceService.deleteById(params.id);
+      const entity = await this.resourceService.deleteById(params.id, req.user);
 
       this.logger.log({
         event: 'delete',
         status: 'success',
         resource: RolesController.resource,
         id: params.id,
+        actorId: req.user.id,
       });
 
       return entity;
@@ -179,6 +185,7 @@ export class RolesController {
         status: 'error',
         resource: RolesController.resource,
         id: params.id,
+        actorId: req.user.id,
       });
 
       throw error;
