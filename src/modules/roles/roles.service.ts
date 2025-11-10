@@ -6,7 +6,6 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateRoleDto, UpdateRoleDto } from './dto/roles.dto';
 import { Role } from '@prisma/client';
-import { ReqUser } from '../../shared/interfaces/request.interface';
 
 @Injectable()
 export class RolesService {
@@ -43,7 +42,7 @@ export class RolesService {
     });
   }
 
-  async deleteById(id: number, user: ReqUser): Promise<Role> {
+  async deleteById(id: number): Promise<Role> {
     const entity = await this.prisma[RolesService.model].findUnique({
       where: { id },
     });
@@ -54,9 +53,7 @@ export class RolesService {
       );
     }
 
-    const isUserAdmin = user.roles.some((role) => role.name === 'ADMIN');
-
-    if (!isUserAdmin || entity.name === 'ADMIN') {
+    if (entity.name === 'ADMIN') {
       throw new ForbiddenException(
         `You do not have permission to delete this ${RolesService.resource}`,
       );

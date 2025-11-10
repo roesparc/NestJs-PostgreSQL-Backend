@@ -164,7 +164,7 @@ export class RolesController {
     @Param() params: IdParamDto,
   ) {
     try {
-      const entity = await this.resourceService.deleteById(params.id, req.user);
+      const entity = await this.resourceService.deleteById(params.id);
 
       this.logger.log({
         event: 'delete',
