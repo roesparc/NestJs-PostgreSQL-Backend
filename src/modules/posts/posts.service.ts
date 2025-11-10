@@ -5,11 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreatePostDto, UpdatePostDto } from './dto/posts.dto';
+import { CreatePostDto, GetPostsDto, UpdatePostDto } from './dto/posts.dto';
 import { Post } from '@prisma/client';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
 import { ReqUser } from '../../shared/interfaces/request.interface';
+import { GetPosts } from './interfaces/posts.interface';
 
 @Injectable()
 export class PostsService {
@@ -41,8 +42,56 @@ export class PostsService {
     });
   }
 
-  async getAll(): Promise<Post[]> {
-    return this.prisma[PostsService.model].findMany();
+  async get(query: GetPostsDto): Promise<GetPosts> {
+    //#region Filters
+    const where: any = {};
+
+    if (query.id) where.id = query.id;
+    if (query.authorId) where.authorId = query.authorId;
+    if (query.slug) where.slug = query.slug;
+    if (query.published !== undefined) where.published = query.published;
+
+    // Term search
+    if (query.term) {
+      where.title = { contains: query.term, mode: 'insensitive' };
+    }
+
+    // Date range filtering
+    if (query.createdAtFrom || query.createdAtTo) {
+      where.createdAt = {};
+
+      if (query.createdAtFrom)
+        where.createdAt.gte = new Date(query.createdAtFrom);
+
+      if (query.createdAtTo) where.createdAt.lte = new Date(query.createdAtTo);
+    }
+    //#endregion
+
+    //#region Include relations
+    const include: any = {};
+
+    if (query.includeAuthor) include.author = { omit: { hash: true } };
+    //#endregion
+
+    const [items, total] = await Promise.all([
+      this.prisma[PostsService.model].findMany({
+        where,
+        orderBy: { [query.sortBy]: query.sortOrder },
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+        include,
+      }),
+
+      this.prisma[PostsService.model].count({ where }),
+    ]);
+
+    return {
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+      pageCount: Math.ceil(total / query.pageSize),
+      items,
+    };
   }
 
   async updateById(

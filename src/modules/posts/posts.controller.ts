@@ -13,7 +13,7 @@ import { AppLogger } from '../../common/logger/logger.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { IdParamDto } from '../../shared/dto/id-param.dto';
 import { PostsService } from './posts.service';
-import { CreatePostDto, UpdatePostDto } from './dto/posts.dto';
+import { CreatePostDto, GetPostsDto, UpdatePostDto } from './dto/posts.dto';
 import type { RequestWithUser } from '../../shared/interfaces/request.interface';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 
@@ -69,17 +69,19 @@ export class PostsController {
 
   @Get()
   @ApiBearerAuth()
-  @ApiOperation({ summary: `Get all ${PostsController.resource}s` })
+  @ApiOperation({
+    summary: `Get ${PostsController.resource}s with query params`,
+  })
   @ApiResponse({
     status: 200,
-    description: `List of all ${PostsController.resource}s`,
+    description: `List of ${PostsController.resource}s`,
   })
-  async getAll() {
+  async get(@Query() query: GetPostsDto) {
     try {
-      const entities = await this.resourceService.getAll();
+      const entities = await this.resourceService.get(query);
 
       this.logger.log({
-        event: 'getAll',
+        event: 'get',
         status: 'success',
         resource: PostsController.resource,
       });
@@ -91,7 +93,7 @@ export class PostsController {
         errorCode: error.status,
         errorMessage: error.message,
 
-        event: 'getAll',
+        event: 'get',
         status: 'error',
         resource: PostsController.resource,
       });
@@ -239,4 +241,5 @@ export class PostsController {
       throw error;
     }
   }
+  //#endregion
 }
