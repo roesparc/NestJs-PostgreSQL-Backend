@@ -146,6 +146,8 @@ export class UsersController {
     }
   }
 
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @Delete('id/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: `Delete ${UsersController.resource} by ID` })
@@ -157,7 +159,10 @@ export class UsersController {
     status: 404,
     description: `${UsersController.resource} not found`,
   })
-  async deleteById(@Param() params: IdParamDto) {
+  async deleteById(
+    @Request() req: RequestWithUser,
+    @Param() params: IdParamDto,
+  ) {
     try {
       const entity = await this.resourceService.deleteById(params.id);
 
@@ -166,6 +171,7 @@ export class UsersController {
         status: 'success',
         resource: UsersController.resource,
         id: params.id,
+        actorId: req.user.id,
       });
 
       return entity;
@@ -179,6 +185,7 @@ export class UsersController {
         status: 'error',
         resource: UsersController.resource,
         id: params.id,
+        actorId: req.user.id,
       });
 
       throw error;
