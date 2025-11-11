@@ -12,7 +12,11 @@ import {
 import { AppLogger } from '../../common/logger/logger.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
-import { CreateProjectDto, UpdateProjectDto } from './dto/projects.dto';
+import {
+  CreateProjectDto,
+  GetProjectsDto,
+  UpdateProjectDto,
+} from './dto/projects.dto';
 import { IdParamDto } from '../../shared/dto/id-param.dto';
 import type { RequestWithUser } from '../../shared/interfaces/request.interface';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
@@ -69,17 +73,19 @@ export class ProjectsController {
 
   @Get()
   @ApiBearerAuth()
-  @ApiOperation({ summary: `Get all ${ProjectsController.resource}s` })
+  @ApiOperation({
+    summary: `Get ${ProjectsController.resource}s with query params`,
+  })
   @ApiResponse({
     status: 200,
-    description: `List of all ${ProjectsController.resource}s`,
+    description: `List of ${ProjectsController.resource}s`,
   })
-  async getAll() {
+  async get(@Query() query: GetProjectsDto) {
     try {
-      const entities = await this.resourceService.getAll();
+      const entities = await this.resourceService.get(query);
 
       this.logger.log({
-        event: 'getAll',
+        event: 'get',
         status: 'success',
         resource: ProjectsController.resource,
       });
@@ -91,7 +97,7 @@ export class ProjectsController {
         errorCode: error.status,
         errorMessage: error.message,
 
-        event: 'getAll',
+        event: 'get',
         status: 'error',
         resource: ProjectsController.resource,
       });

@@ -5,11 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateProjectDto, UpdateProjectDto } from './dto/projects.dto';
+import {
+  CreateProjectDto,
+  GetProjectsDto,
+  UpdateProjectDto,
+} from './dto/projects.dto';
 import { Project } from '@prisma/client';
 import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 import { ReqUser } from '../../shared/interfaces/request.interface';
+import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
 
 @Injectable()
 export class ProjectsService {
@@ -42,8 +47,60 @@ export class ProjectsService {
     });
   }
 
-  async getAll(): Promise<Project[]> {
-    return this.prisma[ProjectsService.model].findMany();
+  async get(query: GetProjectsDto): Promise<PaginatedResponse<Project>> {
+    //#region Filters
+    const where: any = {};
+
+    if (query.id) where.id = query.id;
+    if (query.userId) where.userId = query.userId;
+    if (query.slug) where.slug = query.slug;
+    if (query.featured !== undefined) where.featured = query.featured;
+    if (query.techStack?.length) where.techStack = { hasSome: query.techStack };
+
+    if (query.term) {
+      where.OR = [
+        { title: { contains: query.term, mode: 'insensitive' } },
+        { description: { contains: query.term, mode: 'insensitive' } },
+        { repoUrl: { contains: query.term, mode: 'insensitive' } },
+        { demoUrl: { contains: query.term, mode: 'insensitive' } },
+      ];
+    }
+
+    if (query.createdAtFrom || query.createdAtTo) {
+      where.createdAt = {};
+
+      if (query.createdAtFrom)
+        where.createdAt.gte = new Date(query.createdAtFrom);
+
+      if (query.createdAtTo) where.createdAt.lte = new Date(query.createdAtTo);
+    }
+    //#endregion
+
+    //#region Include relations
+    const include: any = {};
+
+    if (query.includeUser) include.user = true;
+    //#endregion
+
+    const [items, total] = await Promise.all([
+      this.prisma[ProjectsService.model].findMany({
+        where,
+        orderBy: { [query.sortBy]: query.sortOrder },
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+        include,
+      }),
+
+      this.prisma[ProjectsService.model].count({ where }),
+    ]);
+
+    return {
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+      pageCount: Math.ceil(total / query.pageSize),
+      items,
+    };
   }
 
   async updateById(

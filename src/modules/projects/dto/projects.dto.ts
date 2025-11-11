@@ -1,30 +1,43 @@
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
+  IsDateString,
+  IsIn,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
+  Min,
   MinLength,
 } from 'class-validator';
+import { ToBoolean } from '../../../common/transformers/boolean.transformer';
+import { ToArray } from '../../../common/transformers/array.transformer';
 
 export class CreateProjectDto {
   @IsNotEmpty()
   @IsString()
-  @MinLength(3, { message: 'Title must be at least 3 characters' })
-  @ApiProperty({ example: 'Portfolio Website', required: true })
+  @MinLength(3)
+  @ApiProperty({
+    description: 'Title of the project',
+    required: true,
+  })
   title!: string;
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(3, { message: 'Slug must be at least 3 characters' })
-  @ApiProperty({ example: 'portfolio-website', required: true })
+  @MinLength(3)
+  @ApiProperty({
+    description: 'Unique slug identifier',
+    required: true,
+  })
   slug!: string;
 
   @IsOptional()
   @IsString()
   @ApiProperty({
-    example: 'A modern portfolio site showcasing projects',
+    description: 'Short description or summary',
     required: false,
   })
   description?: string;
@@ -32,21 +45,25 @@ export class CreateProjectDto {
   @IsOptional()
   @IsString()
   @ApiProperty({
-    example: 'https://github.com/username/portfolio',
+    description: 'URL of the project’s source code repository',
     required: false,
   })
   repoUrl?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({ example: 'https://portfolio.example.com', required: false })
+  @ApiProperty({
+    description: 'URL of the live project demo or deployment',
+    required: false,
+  })
   demoUrl?: string;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   @ApiProperty({
-    example: ['NestJS', 'React', 'PostgreSQL'],
+    description:
+      'List of technologies used in the project (e.g. NestJS, React, PostgreSQL)',
     required: false,
     type: [String],
   })
@@ -55,10 +72,120 @@ export class CreateProjectDto {
   @IsOptional()
   @IsBoolean()
   @ApiProperty({
-    example: false,
+    description: 'Marks the project as featured if set to true',
     required: false,
   })
   featured?: boolean;
 }
 
 export class UpdateProjectDto extends PartialType(CreateProjectDto) {}
+
+export class GetProjectsDto {
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  @ApiProperty({ description: 'Filter by project ID', required: false })
+  id?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  @ApiProperty({
+    description: 'Filter by user ID (project owner)',
+    required: false,
+  })
+  userId?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  @ToBoolean()
+  @ApiProperty({
+    description: 'Include project owner (user) in the result',
+    required: false,
+  })
+  includeUser?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: 'Filter by slug (exact match)', required: false })
+  slug?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @ToBoolean()
+  @ApiProperty({
+    description: 'Filter by featured status',
+    required: false,
+  })
+  featured?: boolean;
+
+  @IsOptional()
+  @IsString({ each: true })
+  @ToArray()
+  @ApiProperty({
+    description: 'Filter by one or more technologies',
+    required: false,
+  })
+  techStack?: string[];
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description:
+      'Filter by term (partial match), supported fields: title, description, repoUrl and demoUrl',
+    required: false,
+  })
+  term?: string;
+
+  @IsOptional()
+  @IsDateString()
+  @ApiProperty({
+    description: 'Created after this date (ISO string)',
+    required: false,
+  })
+  createdAtFrom?: string;
+
+  @IsOptional()
+  @IsDateString()
+  @ApiProperty({
+    description: 'Created before this date (ISO string)',
+    required: false,
+  })
+  createdAtTo?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  @ApiProperty({
+    description: 'Page number (starts at 1)',
+    example: 1,
+    required: false,
+  })
+  page: number = 1;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  @ApiProperty({
+    description: 'Items per page',
+    example: 50,
+    required: false,
+  })
+  pageSize: number = 50;
+
+  @IsOptional()
+  @IsIn(['id', 'title', 'featured', 'userId', 'createdAt', 'updatedAt'])
+  @ApiProperty({
+    description: 'Sort by field name',
+    example: 'createdAt',
+    required: false,
+  })
+  sortBy: string = 'createdAt';
+
+  @IsOptional()
+  @IsIn(['asc', 'desc'])
+  @ApiProperty({ description: 'Sort order', example: 'desc', required: false })
+  sortOrder: string = 'desc';
+}
