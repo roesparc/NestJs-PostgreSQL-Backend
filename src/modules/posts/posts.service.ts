@@ -67,10 +67,26 @@ export class PostsService {
     }
     //#endregion
 
-    //#region Include relations
-    const include: any = {};
+    //#region Select & Include
+    let select: any;
+    let include: any;
 
-    if (query.includeAuthor) include.author = { omit: { hash: true } };
+    if (query.field?.length) {
+      select = {};
+
+      for (const field of query.field) {
+        select[field] = true;
+      }
+
+      // Handle 'includeAuthor' for compatibility if not already in 'fields'
+      if (query.includeAuthor && !select.user) {
+        select.user = true;
+      }
+    } else {
+      include = {};
+
+      if (query.includeAuthor) include.user = true;
+    }
     //#endregion
 
     if (query.withPagination) {
@@ -80,7 +96,7 @@ export class PostsService {
           orderBy: { [query.sortBy]: query.sortOrder },
           skip: (query.page - 1) * query.pageSize,
           take: query.pageSize,
-          include,
+          ...(select ? { select } : include ? { include } : {}),
         }),
 
         this.prisma[PostsService.model].count({ where }),
@@ -97,7 +113,7 @@ export class PostsService {
       return this.prisma[PostsService.model].findMany({
         where,
         orderBy: { [query.sortBy]: query.sortOrder },
-        include,
+        ...(select ? { select } : include ? { include } : {}),
       });
     }
   }

@@ -204,4 +204,45 @@ export class GetProjectsDto {
   @Type(() => Number)
   @ApiProperty({ description: 'Items per page (default 50)', required: false })
   pageSize: number = 50;
+
+  @IsOptional()
+  @IsString({ each: true })
+  @ToArray()
+  @IsIn(
+    [
+      'id',
+      'title',
+      'slug',
+      'description',
+      'repoUrl',
+      'demoUrl',
+      'featured',
+      'userId',
+      'createdAt',
+      'updatedAt',
+      'user',
+    ],
+    {
+      each: true,
+    },
+  )
+  @ApiProperty({
+    description: 'Select specific fields or relations to return',
+    type: [String],
+    enum: [
+      'id',
+      'title',
+      'slug',
+      'description',
+      'repoUrl',
+      'demoUrl',
+      'featured',
+      'userId',
+      'createdAt',
+      'updatedAt',
+      'user',
+    ],
+    required: false,
+  })
+  field?: string[];
 }

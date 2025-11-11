@@ -164,4 +164,39 @@ export class GetPostsDto {
   @Type(() => Number)
   @ApiProperty({ description: 'Items per page (default 50)', required: false })
   pageSize: number = 50;
+
+  @IsOptional()
+  @IsString({ each: true })
+  @ToArray()
+  @IsIn(
+    [
+      'id',
+      'title',
+      'slug',
+      'content',
+      'published',
+      'createdAt',
+      'updatedAt',
+      'author',
+    ],
+    {
+      each: true,
+    },
+  )
+  @ApiProperty({
+    description: 'Select specific fields or relations to return',
+    type: [String],
+    enum: [
+      'id',
+      'title',
+      'slug',
+      'content',
+      'published',
+      'createdAt',
+      'updatedAt',
+      'author',
+    ],
+    required: false,
+  })
+  field?: string[];
 }

@@ -80,10 +80,26 @@ export class ProjectsService {
     }
     //#endregion
 
-    //#region Include relations
-    const include: any = {};
+    //#region Select & Include
+    let select: any;
+    let include: any;
 
-    if (query.includeUser) include.user = true;
+    if (query.field?.length) {
+      select = {};
+
+      for (const field of query.field) {
+        select[field] = true;
+      }
+
+      // Handle 'includeUser' for compatibility if not already in 'fields'
+      if (query.includeUser && !select.user) {
+        select.user = true;
+      }
+    } else {
+      include = {};
+
+      if (query.includeUser) include.user = true;
+    }
     //#endregion
 
     if (query.withPagination) {
@@ -93,7 +109,7 @@ export class ProjectsService {
           orderBy: { [query.sortBy]: query.sortOrder },
           skip: (query.page - 1) * query.pageSize,
           take: query.pageSize,
-          include,
+          ...(select ? { select } : include ? { include } : {}),
         }),
 
         this.prisma[ProjectsService.model].count({ where }),
@@ -110,7 +126,7 @@ export class ProjectsService {
       return this.prisma[ProjectsService.model].findMany({
         where,
         orderBy: { [query.sortBy]: query.sortOrder },
-        include,
+        ...(select ? { select } : include ? { include } : {}),
       });
     }
   }
