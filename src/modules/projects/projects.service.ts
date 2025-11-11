@@ -47,7 +47,9 @@ export class ProjectsService {
     });
   }
 
-  async get(query: GetProjectsDto): Promise<PaginatedResponse<Project>> {
+  async get(
+    query: GetProjectsDto,
+  ): Promise<Project[] | PaginatedResponse<Project>> {
     //#region Filters
     const where: any = {};
 
@@ -57,6 +59,7 @@ export class ProjectsService {
     if (query.featured !== undefined) where.featured = query.featured;
     if (query.techStack?.length) where.techStack = { hasSome: query.techStack };
 
+    // Term filter
     if (query.term) {
       where.OR = [
         { title: { contains: query.term, mode: 'insensitive' } },
@@ -66,6 +69,7 @@ export class ProjectsService {
       ];
     }
 
+    // Date range filter
     if (query.createdAtFrom || query.createdAtTo) {
       where.createdAt = {};
 
@@ -82,25 +86,33 @@ export class ProjectsService {
     if (query.includeUser) include.user = true;
     //#endregion
 
-    const [items, total] = await Promise.all([
-      this.prisma[ProjectsService.model].findMany({
+    if (query.withPagination) {
+      const [items, total] = await Promise.all([
+        this.prisma[ProjectsService.model].findMany({
+          where,
+          orderBy: { [query.sortBy]: query.sortOrder },
+          skip: (query.page - 1) * query.pageSize,
+          take: query.pageSize,
+          include,
+        }),
+
+        this.prisma[ProjectsService.model].count({ where }),
+      ]);
+
+      return {
+        total,
+        page: query.page,
+        pageSize: query.pageSize,
+        pageCount: Math.ceil(total / query.pageSize),
+        items,
+      };
+    } else {
+      return this.prisma[ProjectsService.model].findMany({
         where,
         orderBy: { [query.sortBy]: query.sortOrder },
-        skip: (query.page - 1) * query.pageSize,
-        take: query.pageSize,
         include,
-      }),
-
-      this.prisma[ProjectsService.model].count({ where }),
-    ]);
-
-    return {
-      total,
-      page: query.page,
-      pageSize: query.pageSize,
-      pageCount: Math.ceil(total / query.pageSize),
-      items,
-    };
+      });
+    }
   }
 
   async updateById(

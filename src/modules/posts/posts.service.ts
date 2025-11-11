@@ -42,7 +42,7 @@ export class PostsService {
     });
   }
 
-  async get(query: GetPostsDto): Promise<PaginatedResponse<Post>> {
+  async get(query: GetPostsDto): Promise<Post[] | PaginatedResponse<Post>> {
     //#region Filters
     const where: any = {};
 
@@ -51,12 +51,12 @@ export class PostsService {
     if (query.slug) where.slug = query.slug;
     if (query.published !== undefined) where.published = query.published;
 
-    // Term search
+    // Term filter
     if (query.term) {
       where.title = { contains: query.term, mode: 'insensitive' };
     }
 
-    // Date range filtering
+    // Date range filter
     if (query.createdAtFrom || query.createdAtTo) {
       where.createdAt = {};
 
@@ -73,25 +73,33 @@ export class PostsService {
     if (query.includeAuthor) include.author = { omit: { hash: true } };
     //#endregion
 
-    const [items, total] = await Promise.all([
-      this.prisma[PostsService.model].findMany({
+    if (query.withPagination) {
+      const [items, total] = await Promise.all([
+        this.prisma[PostsService.model].findMany({
+          where,
+          orderBy: { [query.sortBy]: query.sortOrder },
+          skip: (query.page - 1) * query.pageSize,
+          take: query.pageSize,
+          include,
+        }),
+
+        this.prisma[PostsService.model].count({ where }),
+      ]);
+
+      return {
+        total,
+        page: query.page,
+        pageSize: query.pageSize,
+        pageCount: Math.ceil(total / query.pageSize),
+        items,
+      };
+    } else {
+      return this.prisma[PostsService.model].findMany({
         where,
         orderBy: { [query.sortBy]: query.sortOrder },
-        skip: (query.page - 1) * query.pageSize,
-        take: query.pageSize,
         include,
-      }),
-
-      this.prisma[PostsService.model].count({ where }),
-    ]);
-
-    return {
-      total,
-      page: query.page,
-      pageSize: query.pageSize,
-      pageCount: Math.ceil(total / query.pageSize),
-      items,
-    };
+      });
+    }
   }
 
   async updateById(

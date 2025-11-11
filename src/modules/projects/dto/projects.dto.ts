@@ -162,12 +162,38 @@ export class GetProjectsDto {
   createdAtTo?: string;
 
   @IsOptional()
+  @IsIn(['id', 'title', 'featured', 'userId', 'createdAt', 'updatedAt'])
+  @ApiProperty({
+    description: 'Sort by field name (default createdAt)',
+    enum: ['id', 'title', 'featured', 'userId', 'createdAt', 'updatedAt'],
+    required: false,
+  })
+  sortBy: string = 'createdAt';
+
+  @IsOptional()
+  @IsIn(['asc', 'desc'])
+  @ApiProperty({
+    description: 'Sort order (default desc)',
+    enum: ['asc', 'desc'],
+    required: false,
+  })
+  sortOrder: string = 'desc';
+
+  @IsOptional()
+  @IsBoolean()
+  @ToBoolean()
+  @ApiProperty({
+    description: 'Returns pagination metadata along with items',
+    required: false,
+  })
+  withPagination?: boolean;
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Type(() => Number)
   @ApiProperty({
     description: 'Page number (starts at 1)',
-    example: 1,
     required: false,
   })
   page: number = 1;
@@ -176,24 +202,6 @@ export class GetProjectsDto {
   @IsInt()
   @Min(1)
   @Type(() => Number)
-  @ApiProperty({
-    description: 'Items per page',
-    example: 50,
-    required: false,
-  })
+  @ApiProperty({ description: 'Items per page (default 50)', required: false })
   pageSize: number = 50;
-
-  @IsOptional()
-  @IsIn(['id', 'title', 'featured', 'userId', 'createdAt', 'updatedAt'])
-  @ApiProperty({
-    description: 'Sort by field name',
-    example: 'createdAt',
-    required: false,
-  })
-  sortBy: string = 'createdAt';
-
-  @IsOptional()
-  @IsIn(['asc', 'desc'])
-  @ApiProperty({ description: 'Sort order', example: 'desc', required: false })
-  sortOrder: string = 'desc';
 }
