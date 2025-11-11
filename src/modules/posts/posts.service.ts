@@ -46,8 +46,8 @@ export class PostsService {
     //#region Filters
     const where: any = {};
 
-    if (query.id) where.id = query.id;
-    if (query.authorId) where.authorId = query.authorId;
+    if (query.id?.length) where.id = { in: query.id };
+    if (query.authorId?.length) where.authorId = { in: query.authorId };
     if (query.slug) where.slug = query.slug;
     if (query.published !== undefined) where.published = query.published;
 

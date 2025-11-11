@@ -12,6 +12,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ToBoolean } from '../../../common/transformers/boolean.transformer';
+import { ToArray } from '../../../common/transformers/array.transformer';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -55,16 +56,26 @@ export class UpdatePostDto extends PartialType(CreatePostDto) {}
 
 export class GetPostsDto {
   @IsOptional()
-  @IsInt()
+  @IsInt({ each: true })
   @Type(() => Number)
-  @ApiProperty({ description: 'Filter by post ID', required: false })
-  id?: number;
+  @ToArray()
+  @ApiProperty({
+    description: 'Filter by one or more post IDs',
+    type: [Number],
+    required: false,
+  })
+  id?: number[];
 
   @IsOptional()
-  @IsInt()
+  @IsInt({ each: true })
   @Type(() => Number)
-  @ApiProperty({ description: 'Filter by author ID', required: false })
-  authorId?: number;
+  @ToArray()
+  @ApiProperty({
+    description: 'Filter by one or more author IDs',
+    type: [Number],
+    required: false,
+  })
+  authorId?: number[];
 
   @IsOptional()
   @IsBoolean()

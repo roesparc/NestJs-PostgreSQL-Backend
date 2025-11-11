@@ -51,8 +51,8 @@ export class ProjectsService {
     //#region Filters
     const where: any = {};
 
-    if (query.id) where.id = query.id;
-    if (query.userId) where.userId = query.userId;
+    if (query.id?.length) where.id = { in: query.id };
+    if (query.userId?.length) where.userId = { in: query.userId };
     if (query.slug) where.slug = query.slug;
     if (query.featured !== undefined) where.featured = query.featured;
     if (query.techStack?.length) where.techStack = { hasSome: query.techStack };

@@ -82,19 +82,26 @@ export class UpdateProjectDto extends PartialType(CreateProjectDto) {}
 
 export class GetProjectsDto {
   @IsOptional()
-  @IsInt()
+  @IsInt({ each: true })
   @Type(() => Number)
-  @ApiProperty({ description: 'Filter by project ID', required: false })
-  id?: number;
-
-  @IsOptional()
-  @IsInt()
-  @Type(() => Number)
+  @ToArray()
   @ApiProperty({
-    description: 'Filter by user ID (project owner)',
+    description: 'Filter by one or more project IDs',
+    type: [Number],
     required: false,
   })
-  userId?: number;
+  id?: number[];
+
+  @IsOptional()
+  @IsInt({ each: true })
+  @Type(() => Number)
+  @ToArray()
+  @ApiProperty({
+    description: 'Filter by one or more user IDs (project owner)',
+    type: [Number],
+    required: false,
+  })
+  userId?: number[];
 
   @IsOptional()
   @IsBoolean()
@@ -124,6 +131,7 @@ export class GetProjectsDto {
   @ToArray()
   @ApiProperty({
     description: 'Filter by one or more technologies',
+    type: [String],
     required: false,
   })
   techStack?: string[];
