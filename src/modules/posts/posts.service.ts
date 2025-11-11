@@ -10,7 +10,7 @@ import { Post } from '@prisma/client';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
 import { ReqUser } from '../../shared/interfaces/request.interface';
-import { GetPosts } from './interfaces/posts.interface';
+import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
 
 @Injectable()
 export class PostsService {
@@ -42,7 +42,7 @@ export class PostsService {
     });
   }
 
-  async get(query: GetPostsDto): Promise<GetPosts> {
+  async get(query: GetPostsDto): Promise<PaginatedResponse<Post>> {
     //#region Filters
     const where: any = {};
 
