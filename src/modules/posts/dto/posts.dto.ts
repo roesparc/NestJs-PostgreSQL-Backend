@@ -16,14 +16,11 @@ import { ToArray } from '../../../common/transformers/array.transformer';
 import { Prisma } from '@prisma/client';
 
 const ALL_FIELDS = Object.values(Prisma.PostScalarFieldEnum);
-const SORTABLE_FIELDS = [
-  Prisma.PostScalarFieldEnum.id,
-  Prisma.PostScalarFieldEnum.title,
-  Prisma.PostScalarFieldEnum.authorId,
-  Prisma.PostScalarFieldEnum.published,
-  Prisma.PostScalarFieldEnum.createdAt,
-  Prisma.PostScalarFieldEnum.updatedAt,
-];
+const SORTABLE_FIELDS = ALL_FIELDS.filter(
+  (f) =>
+    f !== Prisma.PostScalarFieldEnum.slug &&
+    f !== Prisma.PostScalarFieldEnum.content,
+);
 
 export class CreatePostDto {
   @IsNotEmpty()

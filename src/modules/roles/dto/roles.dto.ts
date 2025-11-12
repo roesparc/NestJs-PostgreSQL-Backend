@@ -16,12 +16,9 @@ import { ToArray } from '../../../common/transformers/array.transformer';
 import { ToBoolean } from '../../../common/transformers/boolean.transformer';
 
 const ALL_FIELDS = Object.values(Prisma.RoleScalarFieldEnum);
-const SORTABLE_FIELDS = [
-  Prisma.RoleScalarFieldEnum.id,
-  Prisma.RoleScalarFieldEnum.name,
-  Prisma.RoleScalarFieldEnum.createdAt,
-  Prisma.RoleScalarFieldEnum.updatedAt,
-];
+const SORTABLE_FIELDS = ALL_FIELDS.filter(
+  (f) => f !== Prisma.RoleScalarFieldEnum.description,
+);
 
 export class CreateRoleDto {
   @IsNotEmpty()

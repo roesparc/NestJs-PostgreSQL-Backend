@@ -17,14 +17,14 @@ import { ToArray } from '../../../common/transformers/array.transformer';
 import { Prisma } from '@prisma/client';
 
 const ALL_FIELDS = Object.values(Prisma.ProjectScalarFieldEnum);
-const SORTABLE_FIELDS = [
-  Prisma.ProjectScalarFieldEnum.id,
-  Prisma.ProjectScalarFieldEnum.title,
-  Prisma.ProjectScalarFieldEnum.featured,
-  Prisma.ProjectScalarFieldEnum.userId,
-  Prisma.ProjectScalarFieldEnum.createdAt,
-  Prisma.ProjectScalarFieldEnum.updatedAt,
-];
+const SORTABLE_FIELDS = ALL_FIELDS.filter(
+  (f) =>
+    f !== Prisma.ProjectScalarFieldEnum.slug &&
+    f !== Prisma.ProjectScalarFieldEnum.description &&
+    f !== Prisma.ProjectScalarFieldEnum.repoUrl &&
+    f !== Prisma.ProjectScalarFieldEnum.demoUrl &&
+    f !== Prisma.ProjectScalarFieldEnum.techStack,
+);
 
 export class CreateProjectDto {
   @IsNotEmpty()
