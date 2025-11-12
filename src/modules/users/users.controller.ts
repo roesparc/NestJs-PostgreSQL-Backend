@@ -126,7 +126,11 @@ export class UsersController {
     @Body() payload: UpdateUserDto,
   ) {
     try {
-      const entity = await this.resourceService.updateById(params.id, payload);
+      const entity = await this.resourceService.updateById(
+        req.user,
+        params.id,
+        payload,
+      );
 
       this.logger.log({
         event: 'updateById',

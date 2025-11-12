@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import {
 } from './dto/users.dto';
 import { UserProfile, UserWithoutHash } from './interfaces/users.interface';
 import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
+import { ReqUser } from '../../shared/interfaces/request.interface';
 
 @Injectable()
 export class UsersService {
@@ -116,6 +118,7 @@ export class UsersService {
   }
 
   async updateById(
+    reqUser: ReqUser,
     id: number,
     payload: UpdateUserDto,
   ): Promise<UserWithoutHash> {
@@ -126,6 +129,14 @@ export class UsersService {
     if (!entity) {
       throw new NotFoundException(
         `${UsersService.resource} with ID ${id} not found`,
+      );
+    }
+
+    const isUserAdmin = reqUser.roles.some((r) => r.name === 'ADMIN');
+
+    if (reqUser.id !== id && !isUserAdmin) {
+      throw new ForbiddenException(
+        `You do not have permission to update this ${UsersService.resource}`,
       );
     }
 
