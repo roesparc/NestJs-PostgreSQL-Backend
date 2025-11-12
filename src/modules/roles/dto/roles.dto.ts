@@ -62,7 +62,7 @@ export class GetRolesDto {
   @IsBoolean()
   @ToBoolean()
   @ApiProperty({
-    description: 'Include project owner (user) in the result',
+    description: 'Include users in the result',
     required: false,
   })
   includeUsers?: boolean;
