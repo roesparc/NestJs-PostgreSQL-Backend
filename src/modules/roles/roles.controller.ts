@@ -6,12 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { AppLogger } from '../../common/logger/logger.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { CreateRoleDto, UpdateRoleDto } from './dto/roles.dto';
+import { CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto/roles.dto';
 import { RolesService } from './roles.service';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -69,17 +70,19 @@ export class RolesController {
   @Roles('ADMIN')
   @Get()
   @ApiBearerAuth()
-  @ApiOperation({ summary: `Get all ${RolesController.resource}s` })
+  @ApiOperation({
+    summary: `Get ${RolesController.resource}s with query params`,
+  })
   @ApiResponse({
     status: 200,
-    description: `List of all ${RolesController.resource}s`,
+    description: `List of ${RolesController.resource}s`,
   })
-  async getAll() {
+  async get(@Query() query: GetRolesDto) {
     try {
-      const entities = await this.resourceService.getAll();
+      const entities = await this.resourceService.get(query);
 
       this.logger.log({
-        event: 'getAll',
+        event: 'get',
         status: 'success',
         resource: RolesController.resource,
       });
@@ -91,7 +94,7 @@ export class RolesController {
         errorCode: error.status,
         errorMessage: error.message,
 
-        event: 'getAll',
+        event: 'get',
         status: 'error',
         resource: RolesController.resource,
       });
