@@ -86,18 +86,10 @@ export class ProjectsService {
 
     if (query.field?.length) {
       select = {};
-
-      for (const field of query.field) {
-        select[field] = true;
-      }
-
-      // Handle 'includeUser' for compatibility if not already in 'fields'
-      if (query.includeUser && !select.user) {
-        select.user = true;
-      }
+      for (const field of query.field) select[field] = true;
+      if (query.includeUser) select.user = true;
     } else {
       include = {};
-
       if (query.includeUser) include.user = true;
     }
     //#endregion

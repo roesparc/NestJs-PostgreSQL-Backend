@@ -14,6 +14,17 @@ import {
 } from 'class-validator';
 import { ToBoolean } from '../../../common/transformers/boolean.transformer';
 import { ToArray } from '../../../common/transformers/array.transformer';
+import { Prisma } from '@prisma/client';
+
+const ALL_FIELDS = Object.values(Prisma.ProjectScalarFieldEnum);
+const SORTABLE_FIELDS = [
+  Prisma.ProjectScalarFieldEnum.id,
+  Prisma.ProjectScalarFieldEnum.title,
+  Prisma.ProjectScalarFieldEnum.featured,
+  Prisma.ProjectScalarFieldEnum.userId,
+  Prisma.ProjectScalarFieldEnum.createdAt,
+  Prisma.ProjectScalarFieldEnum.updatedAt,
+];
 
 export class CreateProjectDto {
   @IsNotEmpty()
@@ -162,10 +173,10 @@ export class GetProjectsDto {
   createdAtTo?: string;
 
   @IsOptional()
-  @IsIn(['id', 'title', 'featured', 'userId', 'createdAt', 'updatedAt'])
+  @IsIn(SORTABLE_FIELDS)
   @ApiProperty({
     description: 'Sort by field name (default createdAt)',
-    enum: ['id', 'title', 'featured', 'userId', 'createdAt', 'updatedAt'],
+    enum: SORTABLE_FIELDS,
     required: false,
   })
   sortBy: string = 'createdAt';
@@ -208,40 +219,11 @@ export class GetProjectsDto {
   @IsOptional()
   @IsString({ each: true })
   @ToArray()
-  @IsIn(
-    [
-      'id',
-      'title',
-      'slug',
-      'description',
-      'repoUrl',
-      'demoUrl',
-      'featured',
-      'userId',
-      'createdAt',
-      'updatedAt',
-      'user',
-    ],
-    {
-      each: true,
-    },
-  )
+  @IsIn(ALL_FIELDS, { each: true })
   @ApiProperty({
-    description: 'Select specific fields or relations to return',
+    description: 'Select specific fields to return',
     type: [String],
-    enum: [
-      'id',
-      'title',
-      'slug',
-      'description',
-      'repoUrl',
-      'demoUrl',
-      'featured',
-      'userId',
-      'createdAt',
-      'updatedAt',
-      'user',
-    ],
+    enum: ALL_FIELDS,
     required: false,
   })
   field?: string[];

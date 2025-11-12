@@ -73,19 +73,11 @@ export class PostsService {
 
     if (query.field?.length) {
       select = {};
-
-      for (const field of query.field) {
-        select[field] = true;
-      }
-
-      // Handle 'includeAuthor' for compatibility if not already in 'fields'
-      if (query.includeAuthor && !select.user) {
-        select.user = true;
-      }
+      for (const field of query.field) select[field] = true;
+      if (query.includeAuthor) select.author = true;
     } else {
       include = {};
-
-      if (query.includeAuthor) include.user = true;
+      if (query.includeAuthor) include.author = true;
     }
     //#endregion
 

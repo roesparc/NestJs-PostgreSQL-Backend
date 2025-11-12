@@ -13,6 +13,17 @@ import {
 } from 'class-validator';
 import { ToBoolean } from '../../../common/transformers/boolean.transformer';
 import { ToArray } from '../../../common/transformers/array.transformer';
+import { Prisma } from '@prisma/client';
+
+const ALL_FIELDS = Object.values(Prisma.PostScalarFieldEnum);
+const SORTABLE_FIELDS = [
+  Prisma.PostScalarFieldEnum.id,
+  Prisma.PostScalarFieldEnum.title,
+  Prisma.PostScalarFieldEnum.authorId,
+  Prisma.PostScalarFieldEnum.published,
+  Prisma.PostScalarFieldEnum.createdAt,
+  Prisma.PostScalarFieldEnum.updatedAt,
+];
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -122,10 +133,10 @@ export class GetPostsDto {
   createdAtTo?: string;
 
   @IsOptional()
-  @IsIn(['id', 'title', 'authorId', 'published', 'createdAt', 'updatedAt'])
+  @IsIn(SORTABLE_FIELDS)
   @ApiProperty({
     description: 'Sort by field name (default createdAt)',
-    enum: ['id', 'title', 'authorId', 'published', 'createdAt', 'updatedAt'],
+    enum: SORTABLE_FIELDS,
     required: false,
   })
   sortBy: string = 'createdAt';
@@ -168,34 +179,11 @@ export class GetPostsDto {
   @IsOptional()
   @IsString({ each: true })
   @ToArray()
-  @IsIn(
-    [
-      'id',
-      'title',
-      'slug',
-      'content',
-      'published',
-      'createdAt',
-      'updatedAt',
-      'author',
-    ],
-    {
-      each: true,
-    },
-  )
+  @IsIn(ALL_FIELDS, { each: true })
   @ApiProperty({
-    description: 'Select specific fields or relations to return',
+    description: 'Select specific fields to return',
     type: [String],
-    enum: [
-      'id',
-      'title',
-      'slug',
-      'content',
-      'published',
-      'createdAt',
-      'updatedAt',
-      'author',
-    ],
+    enum: ALL_FIELDS,
     required: false,
   })
   field?: string[];
