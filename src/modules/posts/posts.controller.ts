@@ -45,7 +45,7 @@ export class PostsController {
         event: 'create',
         status: 'success',
         resource: PostsController.resource,
-        userId: req.user.id,
+        actorId: req.user.id,
         payload,
       });
 
@@ -59,7 +59,7 @@ export class PostsController {
         event: 'create',
         status: 'error',
         resource: PostsController.resource,
-        userId: req.user.id,
+        actorId: req.user.id,
         payload,
       });
 
@@ -76,7 +76,7 @@ export class PostsController {
     status: 200,
     description: `List of ${PostsController.resource}s`,
   })
-  async get(@Query() query: GetPostsDto) {
+  async get(@Request() req: RequestWithUser, @Query() query: GetPostsDto) {
     try {
       const entities = await this.resourceService.get(query);
 
@@ -84,6 +84,7 @@ export class PostsController {
         event: 'get',
         status: 'success',
         resource: PostsController.resource,
+        actorId: req.user.id,
       });
 
       return entities;
@@ -96,6 +97,7 @@ export class PostsController {
         event: 'get',
         status: 'error',
         resource: PostsController.resource,
+        actorId: req.user.id,
       });
 
       throw error;
@@ -129,8 +131,8 @@ export class PostsController {
         event: 'updateById',
         status: 'success',
         resource: PostsController.resource,
+        actorId: req.user.id,
         id: params.id,
-        userId: req.user.id,
         payload,
       });
 
@@ -144,8 +146,8 @@ export class PostsController {
         event: 'updateById',
         status: 'error',
         resource: PostsController.resource,
+        actorId: req.user.id,
         id: params.id,
-        userId: req.user.id,
         payload,
       });
 
@@ -175,8 +177,8 @@ export class PostsController {
         event: 'delete',
         status: 'success',
         resource: PostsController.resource,
-        id: params.id,
         actorId: req.user.id,
+        id: params.id,
       });
 
       return entity;
@@ -189,8 +191,8 @@ export class PostsController {
         event: 'delete',
         status: 'error',
         resource: PostsController.resource,
-        id: params.id,
         actorId: req.user.id,
+        id: params.id,
       });
 
       throw error;
@@ -219,7 +221,7 @@ export class PostsController {
         event: 'check-slug',
         status: 'success',
         resource: PostsController.resource,
-        userId: req.user.id,
+        actorId: req.user.id,
         query,
         result,
       });
@@ -234,7 +236,7 @@ export class PostsController {
         event: 'check-slug',
         status: 'error',
         resource: PostsController.resource,
-        userId: req.user.id,
+        actorId: req.user.id,
         query,
       });
 

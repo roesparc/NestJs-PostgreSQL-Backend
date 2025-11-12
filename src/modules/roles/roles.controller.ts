@@ -38,7 +38,10 @@ export class RolesController {
     status: 201,
     description: `${RolesController.resource} created successfully`,
   })
-  async create(@Body() payload: CreateRoleDto) {
+  async create(
+    @Request() req: RequestWithUser,
+    @Body() payload: CreateRoleDto,
+  ) {
     try {
       const entity = await this.resourceService.create(payload);
 
@@ -46,6 +49,7 @@ export class RolesController {
         event: 'create',
         status: 'success',
         resource: RolesController.resource,
+        actorId: req.user.id,
         payload,
       });
 
@@ -59,6 +63,7 @@ export class RolesController {
         event: 'create',
         status: 'error',
         resource: RolesController.resource,
+        actorId: req.user.id,
         payload,
       });
 
@@ -77,7 +82,7 @@ export class RolesController {
     status: 200,
     description: `List of ${RolesController.resource}s`,
   })
-  async get(@Query() query: GetRolesDto) {
+  async get(@Request() req: RequestWithUser, @Query() query: GetRolesDto) {
     try {
       const entities = await this.resourceService.get(query);
 
@@ -85,6 +90,7 @@ export class RolesController {
         event: 'get',
         status: 'success',
         resource: RolesController.resource,
+        actorId: req.user.id,
       });
 
       return entities;
@@ -97,6 +103,7 @@ export class RolesController {
         event: 'get',
         status: 'error',
         resource: RolesController.resource,
+        actorId: req.user.id,
       });
 
       throw error;
@@ -117,6 +124,7 @@ export class RolesController {
     description: `${RolesController.resource} not found`,
   })
   async updateById(
+    @Request() req: RequestWithUser,
     @Param() params: IdParamDto,
     @Body() payload: UpdateRoleDto,
   ) {
@@ -127,6 +135,7 @@ export class RolesController {
         event: 'updateById',
         status: 'success',
         resource: RolesController.resource,
+        actorId: req.user.id,
         id: params.id,
         payload,
       });
@@ -141,6 +150,7 @@ export class RolesController {
         event: 'updateById',
         status: 'error',
         resource: RolesController.resource,
+        actorId: req.user.id,
         id: params.id,
         payload,
       });
@@ -173,8 +183,8 @@ export class RolesController {
         event: 'delete',
         status: 'success',
         resource: RolesController.resource,
-        id: params.id,
         actorId: req.user.id,
+        id: params.id,
       });
 
       return entity;
@@ -187,8 +197,8 @@ export class RolesController {
         event: 'delete',
         status: 'error',
         resource: RolesController.resource,
-        id: params.id,
         actorId: req.user.id,
+        id: params.id,
       });
 
       throw error;

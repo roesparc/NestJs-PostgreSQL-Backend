@@ -51,7 +51,7 @@ export class UsersController {
         event: 'create',
         status: 'success',
         resource: UsersController.resource,
-        username: payload.username,
+        actorId: entity.id,
       });
 
       return entity;
@@ -64,6 +64,7 @@ export class UsersController {
         event: 'create',
         status: 'error',
         resource: UsersController.resource,
+        email: payload.email,
         username: payload.username,
       });
 
@@ -80,7 +81,7 @@ export class UsersController {
     status: 200,
     description: `List of ${UsersController.resource}s`,
   })
-  async get(@Query() query: GetUsersDto) {
+  async get(@Request() req: RequestWithUser, @Query() query: GetUsersDto) {
     try {
       const entities = await this.resourceService.get(query);
 
@@ -88,6 +89,7 @@ export class UsersController {
         event: 'get',
         status: 'success',
         resource: UsersController.resource,
+        actorId: req.user.id,
       });
 
       return entities;
@@ -100,6 +102,7 @@ export class UsersController {
         event: 'get',
         status: 'error',
         resource: UsersController.resource,
+        actorId: req.user.id,
       });
 
       throw error;
@@ -118,6 +121,7 @@ export class UsersController {
     description: `${UsersController.resource} not found`,
   })
   async updateById(
+    @Request() req: RequestWithUser,
     @Param() params: IdParamDto,
     @Body() payload: UpdateUserDto,
   ) {
@@ -128,6 +132,7 @@ export class UsersController {
         event: 'updateById',
         status: 'success',
         resource: UsersController.resource,
+        actorId: req.user.id,
         id: params.id,
         payload,
       });
@@ -142,6 +147,7 @@ export class UsersController {
         event: 'updateById',
         status: 'error',
         resource: UsersController.resource,
+        actorId: req.user.id,
         id: params.id,
         payload,
       });
@@ -174,8 +180,8 @@ export class UsersController {
         event: 'delete',
         status: 'success',
         resource: UsersController.resource,
-        id: params.id,
         actorId: req.user.id,
+        id: params.id,
       });
 
       return entity;
@@ -188,8 +194,8 @@ export class UsersController {
         event: 'delete',
         status: 'error',
         resource: UsersController.resource,
-        id: params.id,
         actorId: req.user.id,
+        id: params.id,
       });
 
       throw error;
@@ -209,7 +215,7 @@ export class UsersController {
     status: 404,
     description: `${UsersController.resource} not found`,
   })
-  async getById(@Param() params: IdParamDto) {
+  async getById(@Request() req: RequestWithUser, @Param() params: IdParamDto) {
     try {
       const entity = await this.resourceService.getById(params.id);
 
@@ -217,6 +223,7 @@ export class UsersController {
         event: 'getById',
         status: 'success',
         resource: UsersController.resource,
+        actorId: req.user.id,
         id: params.id,
       });
 
@@ -230,6 +237,7 @@ export class UsersController {
         event: 'getById',
         status: 'error',
         resource: UsersController.resource,
+        actorId: req.user.id,
         id: params.id,
       });
 
@@ -248,7 +256,10 @@ export class UsersController {
     status: 404,
     description: `${UsersController.resource} not found`,
   })
-  async getByUsername(@Param('username') username: string) {
+  async getByUsername(
+    @Request() req: RequestWithUser,
+    @Param('username') username: string,
+  ) {
     try {
       const entity = await this.resourceService.getByUsername(username);
 
@@ -256,6 +267,7 @@ export class UsersController {
         event: 'getByUsername',
         status: 'success',
         resource: UsersController.resource,
+        actorId: req.user.id,
         username,
       });
 
@@ -269,6 +281,7 @@ export class UsersController {
         event: 'getByUsername',
         status: 'error',
         resource: UsersController.resource,
+        actorId: req.user.id,
         username,
       });
 
@@ -295,7 +308,7 @@ export class UsersController {
         event: 'getMe',
         status: 'success',
         resource: UsersController.resource,
-        id: req.user.id,
+        actorId: req.user.id,
       });
 
       return entity;
@@ -308,7 +321,7 @@ export class UsersController {
         event: 'getMe',
         status: 'error',
         resource: UsersController.resource,
-        id: req.user.id,
+        actorId: req.user.id,
       });
 
       throw error;
@@ -327,6 +340,7 @@ export class UsersController {
     description: `${UsersController.resource} not found`,
   })
   async updatePassword(
+    @Request() req: RequestWithUser,
     @Param() params: IdParamDto,
     @Body() payload: UpdateUserPasswordDto,
   ) {
@@ -340,6 +354,7 @@ export class UsersController {
         event: 'updatePassword',
         status: 'success',
         resource: UsersController.resource,
+        actorId: req.user.id,
         id: params.id,
       });
 
@@ -353,6 +368,7 @@ export class UsersController {
         event: 'updatePassword',
         status: 'error',
         resource: UsersController.resource,
+        actorId: req.user.id,
         id: params.id,
       });
 
@@ -377,7 +393,10 @@ export class UsersController {
     status: 404,
     description: 'User or role not found',
   })
-  async assignRole(@Body() payload: UserRoleDto) {
+  async assignRole(
+    @Request() req: RequestWithUser,
+    @Body() payload: UserRoleDto,
+  ) {
     try {
       const entity = await this.resourceService.assignRole(payload);
 
@@ -385,6 +404,7 @@ export class UsersController {
         event: 'assignRole',
         status: 'success',
         resource: UsersController.resource,
+        actorId: req.user.id,
         payload,
       });
 
@@ -398,6 +418,7 @@ export class UsersController {
         event: 'assignRole',
         status: 'error',
         resource: UsersController.resource,
+        actorId: req.user.id,
         payload,
       });
 
@@ -422,7 +443,10 @@ export class UsersController {
     status: 404,
     description: 'User or role not found',
   })
-  async removeRole(@Body() payload: UserRoleDto) {
+  async removeRole(
+    @Request() req: RequestWithUser,
+    @Body() payload: UserRoleDto,
+  ) {
     try {
       const entity = await this.resourceService.removeRole(payload);
 
@@ -430,6 +454,7 @@ export class UsersController {
         event: 'removeRole',
         status: 'success',
         resource: UsersController.resource,
+        actorId: req.user.id,
         payload,
       });
 
@@ -443,6 +468,7 @@ export class UsersController {
         event: 'removeRole',
         status: 'error',
         resource: UsersController.resource,
+        actorId: req.user.id,
         payload,
       });
 

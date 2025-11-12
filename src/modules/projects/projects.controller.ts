@@ -49,7 +49,7 @@ export class ProjectsController {
         event: 'create',
         status: 'success',
         resource: ProjectsController.resource,
-        userId: req.user.id,
+        actorId: req.user.id,
         payload,
       });
 
@@ -63,7 +63,7 @@ export class ProjectsController {
         event: 'create',
         status: 'error',
         resource: ProjectsController.resource,
-        userId: req.user.id,
+        actorId: req.user.id,
         payload,
       });
 
@@ -80,7 +80,7 @@ export class ProjectsController {
     status: 200,
     description: `List of ${ProjectsController.resource}s`,
   })
-  async get(@Query() query: GetProjectsDto) {
+  async get(@Request() req: RequestWithUser, @Query() query: GetProjectsDto) {
     try {
       const entities = await this.resourceService.get(query);
 
@@ -88,6 +88,7 @@ export class ProjectsController {
         event: 'get',
         status: 'success',
         resource: ProjectsController.resource,
+        actorId: req.user.id,
       });
 
       return entities;
@@ -100,6 +101,7 @@ export class ProjectsController {
         event: 'get',
         status: 'error',
         resource: ProjectsController.resource,
+        actorId: req.user.id,
       });
 
       throw error;
@@ -133,8 +135,8 @@ export class ProjectsController {
         event: 'updateById',
         status: 'success',
         resource: ProjectsController.resource,
+        actorId: req.user.id,
         id: params.id,
-        userId: req.user.id,
         payload,
       });
 
@@ -148,8 +150,8 @@ export class ProjectsController {
         event: 'updateById',
         status: 'error',
         resource: ProjectsController.resource,
+        actorId: req.user.id,
         id: params.id,
-        userId: req.user.id,
         payload,
       });
 
@@ -179,8 +181,8 @@ export class ProjectsController {
         event: 'delete',
         status: 'success',
         resource: ProjectsController.resource,
-        id: params.id,
         actorId: req.user.id,
+        id: params.id,
       });
 
       return entity;
@@ -193,8 +195,8 @@ export class ProjectsController {
         event: 'delete',
         status: 'error',
         resource: ProjectsController.resource,
-        id: params.id,
         actorId: req.user.id,
+        id: params.id,
       });
 
       throw error;
@@ -223,7 +225,7 @@ export class ProjectsController {
         event: 'check-slug',
         status: 'success',
         resource: ProjectsController.resource,
-        userId: req.user.id,
+        actorId: req.user.id,
         query,
         result,
       });
@@ -238,7 +240,7 @@ export class ProjectsController {
         event: 'check-slug',
         status: 'error',
         resource: ProjectsController.resource,
-        userId: req.user.id,
+        actorId: req.user.id,
         query,
       });
 
