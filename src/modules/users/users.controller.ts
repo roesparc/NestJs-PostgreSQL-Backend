@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import type { RequestWithUser } from '../../shared/interfaces/request.interface'
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   CreateUserDto,
+  GetUsersDto,
   UpdateUserDto,
   UpdateUserPasswordDto,
   UserRoleDto,
@@ -71,17 +73,19 @@ export class UsersController {
 
   @Get()
   @ApiBearerAuth()
-  @ApiOperation({ summary: `Get all ${UsersController.resource}s` })
+  @ApiOperation({
+    summary: `Get ${UsersController.resource}s with query params`,
+  })
   @ApiResponse({
     status: 200,
-    description: `List of all ${UsersController.resource}s`,
+    description: `List of ${UsersController.resource}s`,
   })
-  async getAll() {
+  async get(@Query() query: GetUsersDto) {
     try {
-      const entities = await this.resourceService.getAll();
+      const entities = await this.resourceService.get(query);
 
       this.logger.log({
-        event: 'getAll',
+        event: 'get',
         status: 'success',
         resource: UsersController.resource,
       });
@@ -93,7 +97,7 @@ export class UsersController {
         errorCode: error.status,
         errorMessage: error.message,
 
-        event: 'getAll',
+        event: 'get',
         status: 'error',
         resource: UsersController.resource,
       });
