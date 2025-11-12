@@ -37,7 +37,7 @@ export class RolesService {
     }
 
     if (query.term) {
-      where.name = { contains: query.term, mode: 'insensitive' };
+      where.OR = [{ name: { contains: query.term, mode: 'insensitive' } }];
     }
 
     if (query.createdAtFrom || query.createdAtTo) {

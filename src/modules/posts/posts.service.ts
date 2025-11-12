@@ -53,16 +53,14 @@ export class PostsService {
 
     // Term filter
     if (query.term) {
-      where.title = { contains: query.term, mode: 'insensitive' };
+      where.OR = [{ title: { contains: query.term, mode: 'insensitive' } }];
     }
 
     // Date range filter
     if (query.createdAtFrom || query.createdAtTo) {
       where.createdAt = {};
-
       if (query.createdAtFrom)
         where.createdAt.gte = new Date(query.createdAtFrom);
-
       if (query.createdAtTo) where.createdAt.lte = new Date(query.createdAtTo);
     }
     //#endregion
