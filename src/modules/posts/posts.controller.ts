@@ -39,7 +39,7 @@ export class PostsController {
     @Body() payload: CreatePostDto,
   ) {
     try {
-      const entity = await this.resourceService.create(req.user.id, payload);
+      const entity = await this.resourceService.create(req.user, payload);
 
       this.logger.log({
         event: 'create',
@@ -122,7 +122,7 @@ export class PostsController {
   ) {
     try {
       const entity = await this.resourceService.updateById(
-        req.user.id,
+        req.user,
         params.id,
         payload,
       );
@@ -171,7 +171,7 @@ export class PostsController {
     @Param() params: IdParamDto,
   ) {
     try {
-      const entity = await this.resourceService.deleteById(params.id, req.user);
+      const entity = await this.resourceService.deleteById(req.user, params.id);
 
       this.logger.log({
         event: 'delete',

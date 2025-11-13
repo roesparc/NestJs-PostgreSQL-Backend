@@ -43,7 +43,7 @@ export class ProjectsController {
     @Body() payload: CreateProjectDto,
   ) {
     try {
-      const entity = await this.resourceService.create(req.user.id, payload);
+      const entity = await this.resourceService.create(req.user, payload);
 
       this.logger.log({
         event: 'create',
@@ -126,8 +126,8 @@ export class ProjectsController {
   ) {
     try {
       const entity = await this.resourceService.updateById(
+        req.user,
         params.id,
-        req.user.id,
         payload,
       );
 
@@ -175,7 +175,7 @@ export class ProjectsController {
     @Param() params: IdParamDto,
   ) {
     try {
-      const entity = await this.resourceService.deleteById(params.id, req.user);
+      const entity = await this.resourceService.deleteById(req.user, params.id);
 
       this.logger.log({
         event: 'delete',

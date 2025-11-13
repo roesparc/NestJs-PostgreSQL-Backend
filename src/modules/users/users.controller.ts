@@ -350,6 +350,7 @@ export class UsersController {
   ) {
     try {
       const entity = await this.resourceService.updatePassword(
+        req.user,
         params.id,
         payload,
       );

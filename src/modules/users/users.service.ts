@@ -134,7 +134,7 @@ export class UsersService {
 
     const isUserAdmin = reqUser.roles.some((r) => r.name === 'ADMIN');
 
-    if (reqUser.id !== id && !isUserAdmin) {
+    if (reqUser.id !== entity.id && !isUserAdmin) {
       throw new ForbiddenException(
         `You do not have permission to update this ${UsersService.resource}`,
       );
@@ -215,6 +215,7 @@ export class UsersService {
   }
 
   async updatePassword(
+    reqUser: ReqUser,
     id: number,
     payload: UpdateUserPasswordDto,
   ): Promise<UserWithoutHash> {
@@ -225,6 +226,12 @@ export class UsersService {
     if (!entity) {
       throw new NotFoundException(
         `${UsersService.resource} with ID ${id} not found`,
+      );
+    }
+
+    if (reqUser.id !== entity.id) {
+      throw new ForbiddenException(
+        `You do not have permission to update password of this ${UsersService.resource}`,
       );
     }
 

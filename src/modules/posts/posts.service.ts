@@ -20,11 +20,11 @@ export class PostsService {
   private static readonly model = 'post';
 
   //#region CRUD
-  async create(authorId: number, payload: CreatePostDto): Promise<Post> {
+  async create(reqUser: ReqUser, payload: CreatePostDto): Promise<Post> {
     const { slug, ...rest } = payload;
 
     const existingSlug = await this.prisma[PostsService.model].findFirst({
-      where: { slug, authorId },
+      where: { slug, authorId: reqUser.id },
     });
 
     if (existingSlug) {
@@ -37,7 +37,7 @@ export class PostsService {
       data: {
         ...rest,
         slug,
-        authorId,
+        authorId: reqUser.id,
       },
     });
   }
@@ -109,8 +109,8 @@ export class PostsService {
   }
 
   async updateById(
+    reqUser: ReqUser,
     id: number,
-    authorId: number,
     payload: UpdatePostDto,
   ): Promise<Post> {
     const entity = await this.prisma[PostsService.model].findUnique({
@@ -123,7 +123,7 @@ export class PostsService {
       );
     }
 
-    if (entity.authorId !== authorId) {
+    if (reqUser.id !== entity.authorId) {
       throw new ForbiddenException(
         `You do not have permission to update this ${PostsService.resource}.`,
       );
@@ -152,7 +152,7 @@ export class PostsService {
     });
   }
 
-  async deleteById(id: number, user: ReqUser): Promise<Post> {
+  async deleteById(reqUser: ReqUser, id: number): Promise<Post> {
     const entity = await this.prisma[PostsService.model].findUnique({
       where: { id },
     });
@@ -163,9 +163,9 @@ export class PostsService {
       );
     }
 
-    const isUserAdmin = user.roles.some((role) => role.name === 'ADMIN');
+    const isUserAdmin = reqUser.roles.some((r) => r.name === 'ADMIN');
 
-    if (entity.authorId !== user.id && !isUserAdmin) {
+    if (reqUser.id !== entity.authorId && !isUserAdmin) {
       throw new ForbiddenException(
         `You do not have permission to delete this ${PostsService.resource}`,
       );
