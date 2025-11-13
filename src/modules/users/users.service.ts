@@ -196,24 +196,6 @@ export class UsersService {
     return entity;
   }
 
-  async getMe(id: number): Promise<UserProfile> {
-    const entity = await this.prisma[UsersService.model].findUnique({
-      where: { id },
-      include: {
-        roles: true,
-      },
-      omit: { hash: true },
-    });
-
-    if (!entity) {
-      throw new NotFoundException(
-        `${UsersService.resource} with ID ${id} not found`,
-      );
-    }
-
-    return entity;
-  }
-
   async updatePassword(
     reqUser: ReqUser,
     id: number,

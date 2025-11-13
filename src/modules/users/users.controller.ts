@@ -300,36 +300,15 @@ export class UsersController {
     status: 200,
     description: 'Current user data',
   })
-  @ApiResponse({
-    status: 404,
-    description: `${UsersController.resource} not found`,
-  })
   async getMe(@Request() req: RequestWithUser) {
-    try {
-      const entity = await this.resourceService.getMe(req.user.id);
+    this.logger.log({
+      event: 'getMe',
+      status: 'success',
+      resource: UsersController.resource,
+      actorId: req.user.id,
+    });
 
-      this.logger.log({
-        event: 'getMe',
-        status: 'success',
-        resource: UsersController.resource,
-        actorId: req.user.id,
-      });
-
-      return entity;
-    } catch (error: any) {
-      this.logger.error({
-        errorType: error.name,
-        errorCode: error.status,
-        errorMessage: error.message,
-
-        event: 'getMe',
-        status: 'error',
-        resource: UsersController.resource,
-        actorId: req.user.id,
-      });
-
-      throw error;
-    }
+    return req.user;
   }
 
   @Patch('update-password/:id')
