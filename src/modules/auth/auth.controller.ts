@@ -18,7 +18,10 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Login user and return JWT token' })
   @ApiResponse({ status: 200, description: 'Successful login' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid credentials or user account is disabled',
+  })
   @ApiBody({ type: LoginDto })
   async login(@Body() payload: LoginDto) {
     const { identifier, password } = payload;
