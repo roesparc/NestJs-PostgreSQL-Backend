@@ -11,12 +11,15 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  private async validateUser(username: string, password: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { username },
+  private async validateUser(identifier: string, password: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { OR: [{ username: identifier }, { email: identifier }] },
     });
 
     if (!user) throw new UnauthorizedException('Invalid credentials');
+
+    if (!user.is_active)
+      throw new UnauthorizedException('User account is disabled');
 
     const passwordValid = await bcrypt.compare(password, user.hash);
 
@@ -25,8 +28,8 @@ export class AuthService {
     return user;
   }
 
-  async login(username: string, password: string): Promise<Login> {
-    const user = await this.validateUser(username, password);
+  async login(identifier: string, password: string): Promise<Login> {
+    const user = await this.validateUser(identifier, password);
     const payload: JwtPayload = { userId: user.id };
 
     return {

@@ -21,16 +21,16 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiBody({ type: LoginDto })
   async login(@Body() payload: LoginDto) {
-    const { username, password } = payload;
+    const { identifier, password } = payload;
 
     try {
-      const login = await this.authService.login(username, password);
+      const login = await this.authService.login(identifier, password);
 
       this.logger.log({
         event: 'login',
         status: 'success',
         resource: this.resource,
-        username,
+        identifier,
       });
 
       return login;
@@ -43,7 +43,7 @@ export class AuthController {
         event: 'login',
         status: 'error',
         resource: this.resource,
-        username,
+        identifier,
       });
 
       throw error;
