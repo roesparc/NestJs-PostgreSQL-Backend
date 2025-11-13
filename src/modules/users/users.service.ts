@@ -47,6 +47,8 @@ export class UsersService {
     const where: any = {};
 
     if (query.id?.length) where.id = { in: query.id };
+    if (query.username) where.username = query.username;
+    if (query.email) where.email = query.email;
     if (query.isActive !== undefined) where.is_active = query.isActive;
 
     if (query.roleId?.length) {
@@ -166,36 +168,6 @@ export class UsersService {
   //#endregion
 
   //#region Extras
-  async getById(id: number): Promise<UserWithoutHash> {
-    const entity = await this.prisma[UsersService.model].findUnique({
-      where: { id },
-      omit: { hash: true },
-    });
-
-    if (!entity) {
-      throw new NotFoundException(
-        `${UsersService.resource} with ID ${id} not found`,
-      );
-    }
-
-    return entity;
-  }
-
-  async getByUsername(username: string): Promise<UserWithoutHash> {
-    const entity = await this.prisma[UsersService.model].findUnique({
-      where: { username },
-      omit: { hash: true },
-    });
-
-    if (!entity) {
-      throw new NotFoundException(
-        `${UsersService.resource} with username ${username} not found`,
-      );
-    }
-
-    return entity;
-  }
-
   async updatePassword(
     reqUser: ReqUser,
     id: number,

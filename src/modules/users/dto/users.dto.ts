@@ -108,6 +108,22 @@ export class GetUsersDto {
   includeRoles?: boolean;
 
   @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'Filter by username (exact match)',
+    required: false,
+  })
+  username?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'Filter by email (exact match)',
+    required: false,
+  })
+  email?: string;
+
+  @IsOptional()
   @IsBoolean()
   @ToBoolean()
   @ApiProperty({
