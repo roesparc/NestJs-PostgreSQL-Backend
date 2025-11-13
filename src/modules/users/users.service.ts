@@ -26,6 +26,20 @@ export class UsersService {
 
   //#region CRUD
   async create(payload: CreateUserDto): Promise<UserWithoutHash> {
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ username: payload.username }, { email: payload.email }],
+      },
+    });
+
+    if (existingUser) {
+      if (existingUser.username === payload.username)
+        throw new BadRequestException('Username is not available');
+
+      if (existingUser.email === payload.email)
+        throw new BadRequestException('Email is already in use');
+    }
+
     const hashedPassword = await bcrypt.hash(payload.password, 10);
 
     return this.prisma[UsersService.model].create({

@@ -43,6 +43,10 @@ export class UsersController {
     status: 201,
     description: `${UsersController.resource} created successfully`,
   })
+  @ApiResponse({
+    status: 400,
+    description: `Username or email is already in use`,
+  })
   async create(@Body() payload: CreateUserDto) {
     try {
       const entity = await this.resourceService.create(payload);
