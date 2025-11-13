@@ -24,31 +24,37 @@ const SORTABLE_FIELDS = ALL_FIELDS.filter(
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
-  @MinLength(3, { message: 'First name must be at least 3 characters' })
-  @ApiProperty({ example: 'John', required: true })
+  @MinLength(3)
+  @ApiProperty({ description: 'User first name', required: true })
   firstName!: string;
 
   @IsOptional()
   @IsString()
-  @MinLength(3, { message: 'Last name must be at least 3 characters' })
-  @ApiProperty({ example: 'Doe', required: false })
+  @MinLength(3)
+  @ApiProperty({ description: 'User last name', required: false })
   lastName?: string;
 
   @IsNotEmpty()
-  @IsEmail({}, { message: 'Email must be a valid email address' })
-  @ApiProperty({ example: 'email@test.com', required: true })
+  @IsEmail()
+  @ApiProperty({
+    description: 'User email, can be used for login',
+    required: true,
+  })
   email!: string;
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(3, { message: 'Username must be at least 3 characters' })
-  @ApiProperty({ example: 'username', required: true })
+  @MinLength(3)
+  @ApiProperty({
+    description: 'User username, can be used for login',
+    required: true,
+  })
   username!: string;
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(6, { message: 'Password must be at least 6 characters' })
-  @ApiProperty({ example: 'password123', required: true })
+  @MinLength(6)
+  @ApiProperty({ description: 'User password', required: true })
   password!: string;
 }
 
@@ -66,12 +72,12 @@ export class UpdateUserPasswordDto extends PickType(CreateUserDto, [
 export class UserRoleDto {
   @IsNotEmpty()
   @IsInt()
-  @ApiProperty({ example: 1, required: true })
+  @ApiProperty({ description: 'User id to associate role', required: true })
   userId!: number;
 
   @IsNotEmpty()
   @IsInt()
-  @ApiProperty({ example: 2, required: true })
+  @ApiProperty({ description: 'Role id to be associated', required: true })
   roleId!: number;
 }
 

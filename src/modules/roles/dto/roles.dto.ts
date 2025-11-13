@@ -23,13 +23,13 @@ const SORTABLE_FIELDS = ALL_FIELDS.filter(
 export class CreateRoleDto {
   @IsNotEmpty()
   @IsString()
-  @MinLength(3, { message: 'Role must be at least 3 characters' })
-  @ApiProperty({ example: 'name', required: true })
+  @MinLength(3)
+  @ApiProperty({ description: 'Role name', required: true })
   name!: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({ example: 'description', required: false })
+  @ApiProperty({ description: 'Role description', required: false })
   description?: string;
 }
 
