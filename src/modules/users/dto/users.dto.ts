@@ -65,6 +65,14 @@ export class UpdateUserDto extends PickType(CreateUserDto, [
   'username',
 ] as const) {}
 
+export class CheckUsernameDto {
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(3)
+  @ApiProperty({ description: 'username', required: true })
+  username!: string;
+}
+
 export class UpdateUserPasswordDto extends PickType(CreateUserDto, [
   'password',
 ] as const) {}

@@ -182,6 +182,11 @@ export class UsersService {
   //#endregion
 
   //#region Extras
+  async checkUsername(username: string): Promise<{ isAvailable: boolean }> {
+    const existing = await this.prisma.user.findUnique({ where: { username } });
+    return { isAvailable: !existing };
+  }
+
   async updatePassword(
     reqUser: ReqUser,
     id: number,

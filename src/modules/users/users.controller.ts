@@ -17,6 +17,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import type { RequestWithUser } from '../../shared/interfaces/request.interface';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
+  CheckUsernameDto,
   CreateUserDto,
   GetUsersDto,
   UpdateUserDto,
@@ -216,6 +217,42 @@ export class UsersController {
   //#endregion
 
   //#region Extras
+  @Public()
+  @Get('check-username/:username')
+  @ApiOperation({ summary: 'Check if passed username is available' })
+  @ApiResponse({
+    status: 200,
+    description: 'Username availability status',
+  })
+  async checkUsername(@Param() params: CheckUsernameDto) {
+    try {
+      const entity = await this.resourceService.checkUsername(params.username);
+
+      this.logger.log({
+        event: 'checkUsername',
+        status: 'success',
+        resource: UsersController.resource,
+        username: params.username,
+        result: entity.isAvailable,
+      });
+
+      return entity;
+    } catch (error: any) {
+      this.logger.error({
+        errorType: error.name,
+        errorCode: error.status,
+        errorMessage: error.message,
+
+        event: 'checkUsername',
+        status: 'error',
+        resource: UsersController.resource,
+        username: params.username,
+      });
+
+      throw error;
+    }
+  }
+
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current authenticated user' })
