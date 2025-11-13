@@ -38,6 +38,10 @@ export class ProjectsController {
     status: 201,
     description: `${ProjectsController.resource} created successfully`,
   })
+  @ApiResponse({
+    status: 400,
+    description: `Slug already exist`,
+  })
   async create(
     @Request() req: RequestWithUser,
     @Body() payload: CreateProjectDto,
@@ -116,6 +120,14 @@ export class ProjectsController {
     description: `${ProjectsController.resource} updated successfully`,
   })
   @ApiResponse({
+    status: 400,
+    description: `Slug already exist`,
+  })
+  @ApiResponse({
+    status: 403,
+    description: `User lacks permission to update this ${ProjectsController.resource}`,
+  })
+  @ApiResponse({
     status: 404,
     description: `${ProjectsController.resource} not found`,
   })
@@ -165,6 +177,10 @@ export class ProjectsController {
   @ApiResponse({
     status: 200,
     description: `${ProjectsController.resource} deleted successfully`,
+  })
+  @ApiResponse({
+    status: 403,
+    description: `User lacks permission to delete this ${ProjectsController.resource}`,
   })
   @ApiResponse({
     status: 404,

@@ -117,6 +117,10 @@ export class UsersController {
     description: `${UsersController.resource} updated successfully`,
   })
   @ApiResponse({
+    status: 403,
+    description: `User lacks permission to update this ${UsersController.resource}`,
+  })
+  @ApiResponse({
     status: 404,
     description: `${UsersController.resource} not found`,
   })
@@ -232,6 +236,10 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: `${UsersController.resource} password updated successfully`,
+  })
+  @ApiResponse({
+    status: 403,
+    description: `User lacks permission to update this ${UsersController.resource}`,
   })
   @ApiResponse({
     status: 404,

@@ -169,6 +169,10 @@ export class RolesController {
     description: `${RolesController.resource} deleted successfully`,
   })
   @ApiResponse({
+    status: 403,
+    description: `User lacks permission to delete this ${RolesController.resource}`,
+  })
+  @ApiResponse({
     status: 404,
     description: `${RolesController.resource} not found`,
   })
