@@ -15,12 +15,12 @@ describe('AuthService', () => {
 
   const mockUser: User = {
     id: 1,
-    first_name: 'test',
-    last_name: 'user',
+    firstName: 'test',
+    lastName: 'user',
     username: 'testuser',
     email: 'test@example.com',
     hash: 'hashed-password',
-    is_active: true,
+    isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -64,7 +64,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if account is disabled', async () => {
-      mockUser.is_active = false;
+      mockUser.isActive = false;
 
       prisma.user.findFirst = jest.fn().mockResolvedValue(mockUser);
 
@@ -72,7 +72,7 @@ describe('AuthService', () => {
         authService['validateUser']('john', 'password'),
       ).rejects.toThrow('User account is disabled');
 
-      mockUser.is_active = true;
+      mockUser.isActive = true;
     });
 
     it('should throw UnauthorizedException if password is invalid', async () => {

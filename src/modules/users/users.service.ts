@@ -40,14 +40,13 @@ export class UsersService {
         throw new BadRequestException('Email is already in use');
     }
 
-    const hashedPassword = await bcrypt.hash(payload.password, 10);
+    const { password, ...rest } = payload;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     return this.prisma[UsersService.model].create({
       data: {
-        first_name: payload.firstName,
-        last_name: payload.lastName,
-        email: payload.email,
-        username: payload.username,
+        ...rest,
         hash: hashedPassword,
       },
       omit: { hash: true },

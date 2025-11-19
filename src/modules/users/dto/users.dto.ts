@@ -1,4 +1,4 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
@@ -58,12 +58,14 @@ export class CreateUserDto {
   password!: string;
 }
 
-export class UpdateUserDto extends PickType(CreateUserDto, [
-  'firstName',
-  'lastName',
-  'email',
-  'username',
-] as const) {}
+export class UpdateUserDto extends PartialType(
+  PickType(CreateUserDto, [
+    'firstName',
+    'lastName',
+    'email',
+    'username',
+  ] as const),
+) {}
 
 export class CheckUsernameDto {
   @IsNotEmpty()

@@ -13,14 +13,14 @@ describe('Auth', () => {
   let testUser: User;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = module.createNestApplication();
     await app.init();
 
-    prisma = moduleFixture.get<PrismaService>(PrismaService);
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
   beforeEach(async () => {
@@ -85,7 +85,7 @@ describe('Auth', () => {
     it('should reject inactive user', async () => {
       await prisma.user.update({
         where: { id: testUser.id },
-        data: { is_active: false },
+        data: { isActive: false },
       });
 
       const response = await request(app.getHttpServer())

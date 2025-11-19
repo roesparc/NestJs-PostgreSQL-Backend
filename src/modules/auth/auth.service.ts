@@ -18,7 +18,7 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    if (!user.is_active)
+    if (!user.isActive)
       throw new UnauthorizedException('User account is disabled');
 
     const passwordValid = await bcrypt.compare(password, user.hash);

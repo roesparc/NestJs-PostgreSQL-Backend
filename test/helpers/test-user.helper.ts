@@ -13,8 +13,8 @@ export async function createTestUser(
 
   const user = await prisma.user.create({
     data: {
-      first_name: overrides?.firstName || 'Test',
-      last_name: overrides?.lastName || 'User',
+      firstName: overrides?.firstName || 'Test',
+      lastName: overrides?.lastName || 'User',
       email: overrides?.email || 'test_user@example.com',
       username: overrides?.username || 'testuser',
       hash,
