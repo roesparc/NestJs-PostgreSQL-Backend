@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../src/app.module';
-import { PrismaService } from '../src/prisma/prisma.service';
-import { cleanDatabase } from './helpers/database.helper';
-import { createTestUser, testPassword } from './helpers/test-user.helper';
+import { AppModule } from '../../src/app.module';
+import { PrismaService } from '../../src/prisma/prisma.service';
+import { cleanDatabase } from '../helpers/database.helper';
+import { createTestUser, testPassword } from '../helpers/test-user.helper';
 import { User } from '@prisma/client';
 
 describe('Auth', () => {
