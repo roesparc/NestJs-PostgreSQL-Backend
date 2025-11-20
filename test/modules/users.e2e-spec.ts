@@ -92,7 +92,22 @@ describe('Users', () => {
   });
 
   describe('GET /users', () => {
-    it('should return list of users for authenticated user', async () => {
+    const extraUser = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@example.com',
+      username: 'johndoe',
+    };
+
+    it('should reject unauthenticated requests', async () => {
+      const res = await request(app.getHttpServer()).get('/users').expect(401);
+
+      expect(res.body.message).toContain('Unauthorized');
+    });
+
+    it('should return list of users', async () => {
+      await createTestUser(prisma, extraUser);
+
       const token = await loginAs(app, testUser);
 
       const res = await request(app.getHttpServer())
@@ -101,23 +116,184 @@ describe('Users', () => {
         .expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
+      expect(res.body.length).toBe(2);
     });
 
-    it('should filter users by email', async () => {
+    it('should return paginated users', async () => {
+      await createTestUser(prisma, extraUser);
+
       const token = await loginAs(app, testUser);
 
       const res = await request(app.getHttpServer())
-        .get('/users?email=' + testUser.email)
+        .get('/users?withPagination=true&page=1&pageSize=1')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.total).toBe(2);
+      expect(res.body.page).toBe(1);
+      expect(res.body.pageSize).toBe(1);
+      expect(res.body.pageCount).toBe(2);
+      expect(Array.isArray(res.body.items)).toBe(true);
+    });
+
+    it('should filter users by id', async () => {
+      await createTestUser(prisma, extraUser);
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?id=' + testUser.id)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(res.body.length).toBe(1);
-      expect(res.body[0].email).toBe(testUser.email);
+      expect(res.body[0].id).toBe(testUser.id);
+    });
+
+    it('should allow filtering by email', async () => {
+      await createTestUser(prisma, extraUser);
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?email=john@example.com')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].email).toBe('john@example.com');
+    });
+
+    it('should allow filtering by username', async () => {
+      await createTestUser(prisma, extraUser);
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?username=johndoe')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].username).toBe('johndoe');
+    });
+
+    it('should return empty array when filter matches no users', async () => {
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?username=doesnotexist')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
+    });
+
+    it('should support filtering by multiple fields together', async () => {
+      await createTestUser(prisma, extraUser);
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?email=john@example.com&username=johndoe')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].email).toBe('john@example.com');
+      expect(res.body[0].username).toBe('johndoe');
+    });
+
+    it('should apply pagination and filters together', async () => {
+      await createTestUser(prisma, extraUser);
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get(
+          '/users?withPagination=true&page=1&pageSize=1&email=john@example.com',
+        )
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.total).toBe(1);
+      expect(res.body.items.length).toBe(1);
+      expect(res.body.items[0].email).toBe('john@example.com');
+    });
+
+    it('should return 400 for invalid pagination parameters', async () => {
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?withPagination=true&page=-1&pageSize=0')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(400);
+
+      expect(res.body.message).toBeDefined();
+    });
+
+    it('should support sorting', async () => {
+      await createTestUser(prisma, extraUser);
+      await createTestUser(prisma, {
+        firstName: 'Alice',
+        email: 'a@example.com',
+        username: 'alice',
+      });
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?sortBy=firstName&sortOrder=asc')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const names = res.body.map((u) => u.firstName);
+      expect(names).toEqual(['Alice', 'John', 'Test']);
+    });
+
+    it('should return only active users', async () => {
+      const inactiveUser = await createTestUser(prisma, extraUser);
+      await prisma.user.update({
+        where: { id: inactiveUser.id },
+        data: { isActive: false },
+      });
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?isActive=true')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.some((u) => u.id === inactiveUser.id)).toBe(false);
+    });
+
+    it('should filter by term', async () => {
+      await createTestUser(prisma, extraUser);
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?term=john')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].firstName).toBe('John');
     });
   });
 
   describe('PATCH /users/id/:id', () => {
+    it('should reject unauthenticated requests', async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/users/id/${testUser.id}`)
+        .send({ firstName: 'X' })
+        .expect(401);
+
+      expect(res.body.message).toContain('Unauthorized');
+    });
+
     it('should allow a user to update their own profile', async () => {
       const token = await loginAs(app, testUser);
 
@@ -173,6 +349,14 @@ describe('Users', () => {
   });
 
   describe('DELETE /users/id/:id', () => {
+    it('should reject unauthenticated requests', async () => {
+      const res = await request(app.getHttpServer())
+        .delete(`/users/id/${testUser.id}`)
+        .expect(401);
+
+      expect(res.body.message).toContain('Unauthorized');
+    });
+
     it('should allow ADMIN to delete a user', async () => {
       const { user: admin } = await createAdminUser(prisma);
       const token = await loginAs(app, admin);
@@ -197,6 +381,14 @@ describe('Users', () => {
   });
 
   describe('GET /users/me', () => {
+    it('should reject unauthenticated requests', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/users/me')
+        .expect(401);
+
+      expect(res.body.message).toContain('Unauthorized');
+    });
+
     it('should return currently authenticated user', async () => {
       const token = await loginAs(app, testUser);
 
@@ -229,6 +421,14 @@ describe('Users', () => {
   });
 
   describe('PATCH /users/update-password/:id', () => {
+    it('should reject unauthenticated requests', async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/users/update-password/${testUser.id}`)
+        .expect(401);
+
+      expect(res.body.message).toContain('Unauthorized');
+    });
+
     it('should allow user to update their own password', async () => {
       const token = await loginAs(app, testUser);
 
@@ -269,6 +469,15 @@ describe('Users', () => {
   });
 
   describe('PATCH /users/assign-role', () => {
+    it('should reject unauthenticated requests', async () => {
+      const res = await request(app.getHttpServer())
+        .patch('/users/assign-role')
+        .send({ userId: testUser.id, roleId: 1 })
+        .expect(401);
+
+      expect(res.body.message).toContain('Unauthorized');
+    });
+
     it('should assign a role to a user', async () => {
       const { user: admin } = await createAdminUser(prisma);
       const token = await loginAs(app, admin);
@@ -327,6 +536,15 @@ describe('Users', () => {
   });
 
   describe('PATCH /users/remove-role', () => {
+    it('should reject unauthenticated requests', async () => {
+      const res = await request(app.getHttpServer())
+        .patch('/users/remove-role')
+        .send({ userId: testUser.id, roleId: 1 })
+        .expect(401);
+
+      expect(res.body.message).toContain('Unauthorized');
+    });
+
     it('should remove a role from a user', async () => {
       const { user: admin, role } = await createAdminUser(prisma);
       const token = await loginAs(app, admin);
