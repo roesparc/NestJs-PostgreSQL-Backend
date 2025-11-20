@@ -62,7 +62,7 @@ export class UsersService {
     if (query.id?.length) where.id = { in: query.id };
     if (query.username) where.username = query.username;
     if (query.email) where.email = query.email;
-    if (query.isActive !== undefined) where.is_active = query.isActive;
+    if (query.isActive !== undefined) where.isActive = query.isActive;
 
     if (query.roleId?.length) {
       where.roles = {
@@ -74,8 +74,8 @@ export class UsersService {
 
     if (query.term) {
       where.OR = [
-        { first_name: { contains: query.term, mode: 'insensitive' } },
-        { last_name: { contains: query.term, mode: 'insensitive' } },
+        { firstName: { contains: query.term, mode: 'insensitive' } },
+        { lastName: { contains: query.term, mode: 'insensitive' } },
         { email: { contains: query.term, mode: 'insensitive' } },
         { username: { contains: query.term, mode: 'insensitive' } },
       ];
