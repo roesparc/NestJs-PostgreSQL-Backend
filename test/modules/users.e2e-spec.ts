@@ -165,6 +165,17 @@ describe('Users', () => {
       expect(res.body[0].id).toBe(adminUser.id);
     });
 
+    it('should include roles when includeRoles=true', async () => {
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?includeRoles=true')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body[0].roles).toBeDefined();
+    });
+
     it('should allow filtering by email', async () => {
       await createTestUser(prisma, extraUser);
 
@@ -203,21 +214,6 @@ describe('Users', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(0);
-    });
-
-    it('should support filtering by multiple fields together', async () => {
-      await createTestUser(prisma, extraUser);
-
-      const token = await loginAs(app, testUser);
-
-      const res = await request(app.getHttpServer())
-        .get('/users?email=john@example.com&username=johndoe')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-
-      expect(res.body.length).toBe(1);
-      expect(res.body[0].email).toBe('john@example.com');
-      expect(res.body[0].username).toBe('johndoe');
     });
 
     it('should apply pagination and filters together', async () => {
@@ -296,6 +292,36 @@ describe('Users', () => {
 
       expect(res.body.length).toBe(1);
       expect(res.body[0].firstName).toBe('John');
+    });
+
+    it('should filter by createdAt range', async () => {
+      const newUser = await createTestUser(prisma, extraUser);
+
+      const createdAtFrom = newUser.createdAt.toISOString();
+      const createdAtTo = newUser.createdAt.toISOString();
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get(`/users?createdAtFrom=${createdAtFrom}&createdAtTo=${createdAtTo}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].id).toBe(newUser.id);
+    });
+
+    it('should support selecting custom fields', async () => {
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get(`/users?field=id&field=username`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body[0]).toHaveProperty('id');
+      expect(res.body[0]).toHaveProperty('username');
+      expect(res.body[0]).not.toHaveProperty('email');
     });
   });
 

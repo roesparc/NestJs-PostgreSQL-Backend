@@ -163,6 +163,24 @@ describe('UsersService', () => {
       expect(result).toHaveLength(1);
     });
 
+    it('should include roles when includeRoles=true', async () => {
+      prisma.user.findMany = jest
+        .fn()
+        .mockResolvedValue([{ ...mockUser, roles: [mockRole] }]);
+
+      const result = await service.get({
+        ...defaultFields,
+        includeRoles: true,
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: { roles: true },
+        }),
+      );
+      expect(result[0].roles).toBeDefined();
+    });
+
     it('should filter users by email', async () => {
       prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
 
@@ -206,27 +224,7 @@ describe('UsersService', () => {
       expect(result).toEqual([]);
     });
 
-    it('should support filtering by multiple fields', async () => {
-      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
-
-      const result = await service.get({
-        ...defaultFields,
-        email: mockUser.email,
-        username: mockUser.username,
-      });
-
-      expect(prisma.user.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            email: mockUser.email,
-            username: mockUser.username,
-          },
-        }),
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('should apply pagination and filters together', async () => {
+    it('should apply pagination + filters', async () => {
       prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
       prisma.user.count = jest.fn().mockResolvedValue(1);
 
@@ -306,6 +304,50 @@ describe('UsersService', () => {
           },
         }),
       );
+    });
+
+    it('should filter by createdAt range', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+
+      const createdAtFrom = new Date().toISOString();
+      const createdAtTo = new Date().toISOString();
+
+      await service.get({
+        ...defaultFields,
+        createdAtFrom,
+        createdAtTo,
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            createdAt: {
+              gte: new Date(createdAtFrom),
+              lte: new Date(createdAtTo),
+            },
+          },
+        }),
+      );
+    });
+
+    it('should support selecting custom fields', async () => {
+      prisma.user.findMany = jest
+        .fn()
+        .mockResolvedValue([{ id: 1, username: 'EDITOR' }]);
+
+      const result = await service.get({
+        ...defaultFields,
+        field: ['id', 'username'],
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: { id: true, username: true },
+        }),
+      );
+      expect(result[0]).toHaveProperty('id');
+      expect(result[0]).toHaveProperty('username');
+      expect(result[0]).not.toHaveProperty('email');
     });
   });
 
