@@ -111,6 +111,7 @@ export class UsersService {
           skip: (query.page - 1) * query.pageSize,
           take: query.pageSize,
           ...(select ? { select } : include ? { include } : {}),
+          omit: { hash: true },
         }),
 
         this.prisma[UsersService.model].count({ where }),
@@ -128,6 +129,7 @@ export class UsersService {
         where,
         orderBy: { [query.sortBy]: query.sortOrder },
         ...(select ? { select } : include ? { include } : {}),
+        omit: { hash: true },
       });
     }
   }

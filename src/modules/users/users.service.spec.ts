@@ -10,6 +10,7 @@ import {
 import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/users.dto';
 import { ReqUser } from '../../shared/interfaces/request.interface';
+import { disconnect } from 'process';
 
 jest.mock('bcrypt');
 
@@ -74,8 +75,11 @@ describe('UsersService', () => {
 
       expect(prisma.user.findFirst).toHaveBeenCalled();
       expect(bcrypt.hash).toHaveBeenCalledWith('password', 10);
-      expect(prisma.user.create).toHaveBeenCalled();
-      expect(result).toBeDefined();
+      expect(prisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          omit: { hash: true },
+        }),
+      );
     });
 
     it('should throw if username already exists', async () => {
@@ -107,7 +111,9 @@ describe('UsersService', () => {
 
       const result = await service.get(defaultFields);
 
-      expect(prisma.user.findMany).toHaveBeenCalled();
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ omit: { hash: true } }),
+      );
       expect(result).toHaveLength(1);
     });
 
@@ -120,7 +126,9 @@ describe('UsersService', () => {
         withPagination: true,
       });
 
-      expect(prisma.user.findMany).toHaveBeenCalled();
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ omit: { hash: true } }),
+      );
       expect(prisma.user.count).toHaveBeenCalled();
       expect(result).toMatchObject({
         total: 1,
@@ -353,14 +361,24 @@ describe('UsersService', () => {
 
   describe('updateById', () => {
     it('should allow a user to update their own profile', async () => {
+      const updated = { ...mockUser, username: 'update' };
+
       prisma.user.findUnique = jest.fn().mockResolvedValue(mockUser);
-      prisma.user.update = jest.fn().mockResolvedValue(mockUser);
+      prisma.user.update = jest.fn().mockResolvedValue(updated);
 
       const result = await service.updateById(mockReqUser, 1, {
-        firstName: 'updated',
+        username: 'update',
       });
 
-      expect(result).toBeDefined();
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { username: 'update' },
+        omit: { hash: true },
+      });
+      expect(result).toEqual(updated);
     });
 
     it('should throw Forbidden if not owner or admin', async () => {
@@ -402,8 +420,11 @@ describe('UsersService', () => {
 
       const result = await service.deleteById(1);
 
-      expect(result).toBeDefined();
-      expect(prisma.user.delete).toHaveBeenCalled();
+      expect(prisma.user.delete).toHaveBeenCalledWith({
+        where: { id: 1 },
+        omit: { hash: true },
+      });
+      expect(result).toEqual(mockUser);
     });
 
     it('should throw NotFound if not exists', async () => {
@@ -481,6 +502,18 @@ describe('UsersService', () => {
         roleId: 1,
       });
 
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: {
+          roles: {
+            connect: { id: 1 },
+          },
+        },
+        include: {
+          roles: true,
+        },
+        omit: { hash: true },
+      });
       expect(result.roles).toEqual([mockAdminRole]);
     });
 
@@ -532,6 +565,18 @@ describe('UsersService', () => {
         roleId: 1,
       });
 
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: {
+          roles: {
+            disconnect: { id: 1 },
+          },
+        },
+        include: {
+          roles: true,
+        },
+        omit: { hash: true },
+      });
       expect(result.roles).toHaveLength(0);
     });
 
