@@ -150,6 +150,21 @@ describe('Users', () => {
       expect(res.body[0].id).toBe(testUser.id);
     });
 
+    it('should filter by roleId (users with assigned role)', async () => {
+      const { user: adminUser, role: adminRole } =
+        await createAdminUser(prisma);
+
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .get('/users?roleId=' + adminRole.id)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].id).toBe(adminUser.id);
+    });
+
     it('should allow filtering by email', async () => {
       await createTestUser(prisma, extraUser);
 

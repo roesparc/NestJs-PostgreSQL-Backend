@@ -145,6 +145,24 @@ describe('UsersService', () => {
       expect(result[0].id).toBe(mockUser.id);
     });
 
+    it('should filter by roleId (users with assigned role)', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+
+      const result = await service.get({
+        ...defaultFields,
+        roleId: [mockRole.id],
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            roles: { some: { id: { in: [mockRole.id] } } },
+          },
+        }),
+      );
+      expect(result).toHaveLength(1);
+    });
+
     it('should filter users by email', async () => {
       prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
 
