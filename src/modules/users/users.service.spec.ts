@@ -122,11 +122,13 @@ describe('UsersService', () => {
 
       expect(prisma.user.findMany).toHaveBeenCalled();
       expect(prisma.user.count).toHaveBeenCalled();
-      expect(result).toHaveProperty('total', 1);
-      expect(result).toHaveProperty('page', 1);
-      expect(result).toHaveProperty('pageSize', 1);
-      expect(result).toHaveProperty('pageCount', 1);
-      expect(result).toHaveProperty('items', [mockUser]);
+      expect(result).toMatchObject({
+        total: 1,
+        page: 1,
+        pageSize: 1,
+        pageCount: 1,
+        items: [mockUser],
+      });
     });
 
     it('should filter users by id', async () => {
