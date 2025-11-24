@@ -290,7 +290,7 @@ describe('UsersService', () => {
   });
 
   describe('updateById', () => {
-    it('should update user if owner', async () => {
+    it('should allow a user to update their own profile', async () => {
       prisma.user.findUnique = jest.fn().mockResolvedValue(mockUser);
       prisma.user.update = jest.fn().mockResolvedValue(mockUser);
 
@@ -299,6 +299,18 @@ describe('UsersService', () => {
       });
 
       expect(result).toBeDefined();
+    });
+
+    it('should throw Forbidden if not owner or admin', async () => {
+      mockReqUser.id = 2;
+
+      prisma.user.findUnique = jest.fn().mockResolvedValue(mockUser);
+
+      await expect(service.updateById(mockReqUser, 1, {})).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      mockReqUser.id = 1;
     });
 
     it('should update user if admin', async () => {
@@ -318,18 +330,6 @@ describe('UsersService', () => {
       await expect(service.updateById(mockAdminReqUser, 1, {})).rejects.toThrow(
         NotFoundException,
       );
-    });
-
-    it('should throw Forbidden if not owner or admin', async () => {
-      mockReqUser.id = 2;
-
-      prisma.user.findUnique = jest.fn().mockResolvedValue(mockUser);
-
-      await expect(service.updateById(mockReqUser, 1, {})).rejects.toThrow(
-        ForbiddenException,
-      );
-
-      mockReqUser.id = 1;
     });
   });
 
@@ -352,14 +352,6 @@ describe('UsersService', () => {
   });
 
   describe('checkUsername', () => {
-    it('should return available = true when username does not exist', async () => {
-      prisma.user.findUnique = jest.fn().mockResolvedValue(null);
-
-      const result = await service.checkUsername('testuser');
-
-      expect(result.isAvailable).toBe(true);
-    });
-
     it('should return available = false when username exists', async () => {
       prisma.user.findUnique = jest.fn().mockResolvedValue(mockUser);
 
@@ -367,12 +359,20 @@ describe('UsersService', () => {
 
       expect(result.isAvailable).toBe(false);
     });
+
+    it('should return available = true when username does not exist', async () => {
+      prisma.user.findUnique = jest.fn().mockResolvedValue(null);
+
+      const result = await service.checkUsername('testuser');
+
+      expect(result.isAvailable).toBe(true);
+    });
   });
 
   describe('updatePassword', () => {
     const dto = { password: 'newpass' };
 
-    it('should update password if owner', async () => {
+    it('should allow user to update their own password', async () => {
       prisma.user.findUnique = jest.fn().mockResolvedValue(mockUser);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
       prisma.user.update = jest.fn().mockResolvedValue(mockUser);
@@ -380,14 +380,6 @@ describe('UsersService', () => {
       const result = await service.updatePassword(mockReqUser, 1, dto);
 
       expect(result).toBeDefined();
-    });
-
-    it('should throw NotFound if user not found', async () => {
-      prisma.user.findUnique = jest.fn().mockResolvedValue(null);
-
-      await expect(service.updatePassword(mockReqUser, 1, dto)).rejects.toThrow(
-        NotFoundException,
-      );
     });
 
     it('should throw Forbidden if not owner', async () => {
@@ -400,6 +392,14 @@ describe('UsersService', () => {
       );
 
       mockReqUser.id = 1;
+    });
+
+    it('should throw NotFound if user not found', async () => {
+      prisma.user.findUnique = jest.fn().mockResolvedValue(null);
+
+      await expect(service.updatePassword(mockReqUser, 1, dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -422,13 +422,16 @@ describe('UsersService', () => {
       expect(result.roles).toEqual([mockAdminRole]);
     });
 
-    it('should throw NotFound if user not found', async () => {
-      prisma.user.findUnique = jest.fn().mockResolvedValue(null);
+    it('should throw BadRequest if user already has role', async () => {
+      prisma.user.findUnique = jest.fn().mockResolvedValue({
+        ...mockUser,
+        roles: [mockAdminRole],
+      });
       prisma.role.findUnique = jest.fn().mockResolvedValue(mockAdminRole);
 
       await expect(
         service.assignRole({ userId: 1, roleId: 1 }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw NotFound if role not found', async () => {
@@ -440,16 +443,13 @@ describe('UsersService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw BadRequest if user already has role', async () => {
-      prisma.user.findUnique = jest.fn().mockResolvedValue({
-        ...mockUser,
-        roles: [mockAdminRole],
-      });
+    it('should throw NotFound if user not found', async () => {
+      prisma.user.findUnique = jest.fn().mockResolvedValue(null);
       prisma.role.findUnique = jest.fn().mockResolvedValue(mockAdminRole);
 
       await expect(
         service.assignRole({ userId: 1, roleId: 1 }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -473,13 +473,16 @@ describe('UsersService', () => {
       expect(result.roles).toHaveLength(0);
     });
 
-    it('should throw NotFound if user not found', async () => {
-      prisma.user.findUnique = jest.fn().mockResolvedValue(null);
+    it('should throw BadRequest if user does not have role', async () => {
+      prisma.user.findUnique = jest.fn().mockResolvedValue({
+        ...mockUser,
+        roles: [],
+      });
       prisma.role.findUnique = jest.fn().mockResolvedValue(mockAdminRole);
 
       await expect(
         service.removeRole({ userId: 1, roleId: 1 }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw NotFound if role not found', async () => {
@@ -494,16 +497,13 @@ describe('UsersService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw BadRequest if user does not have role', async () => {
-      prisma.user.findUnique = jest.fn().mockResolvedValue({
-        ...mockUser,
-        roles: [],
-      });
+    it('should throw NotFound if user not found', async () => {
+      prisma.user.findUnique = jest.fn().mockResolvedValue(null);
       prisma.role.findUnique = jest.fn().mockResolvedValue(mockAdminRole);
 
       await expect(
         service.removeRole({ userId: 1, roleId: 1 }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });
