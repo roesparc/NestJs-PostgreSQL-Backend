@@ -100,15 +100,12 @@ describe('UsersService', () => {
   });
 
   describe('get', () => {
-    it('should return all users without pagination', async () => {
+    const defaultFields = { sortBy: '', sortOrder: '', page: 1, pageSize: 1 };
+
+    it('should return list of users', async () => {
       prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
 
-      const result = await service.get({
-        sortBy: 'id',
-        sortOrder: 'asc',
-        page: 1,
-        pageSize: 10,
-      });
+      const result = await service.get(defaultFields);
 
       expect(prisma.user.findMany).toHaveBeenCalled();
       expect(result).toHaveLength(1);
@@ -119,10 +116,7 @@ describe('UsersService', () => {
       prisma.user.count = jest.fn().mockResolvedValue(1);
 
       const result = await service.get({
-        sortBy: 'id',
-        sortOrder: 'asc',
-        page: 1,
-        pageSize: 10,
+        ...defaultFields,
         withPagination: true,
       });
 
@@ -130,9 +124,168 @@ describe('UsersService', () => {
       expect(prisma.user.count).toHaveBeenCalled();
       expect(result).toHaveProperty('total', 1);
       expect(result).toHaveProperty('page', 1);
-      expect(result).toHaveProperty('pageSize', 10);
+      expect(result).toHaveProperty('pageSize', 1);
       expect(result).toHaveProperty('pageCount', 1);
       expect(result).toHaveProperty('items', [mockUser]);
+    });
+
+    it('should filter users by id', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+
+      const result = await service.get({ ...defaultFields, id: [mockUser.id] });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: { in: [mockUser.id] } },
+        }),
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(mockUser.id);
+    });
+
+    it('should filter users by email', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+
+      const result = await service.get({
+        ...defaultFields,
+        email: mockUser.email,
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { email: mockUser.email },
+        }),
+      );
+      expect(result[0].email).toBe(mockUser.email);
+    });
+
+    it('should filter users by username', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+
+      const result = await service.get({
+        ...defaultFields,
+        username: mockUser.username,
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { username: mockUser.username },
+        }),
+      );
+      expect(result[0].username).toBe(mockUser.username);
+    });
+
+    it('should return empty array when no users match filters', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([]);
+
+      const result = await service.get({
+        ...defaultFields,
+        username: 'doesnotexist',
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should support filtering by multiple fields', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+
+      const result = await service.get({
+        ...defaultFields,
+        email: mockUser.email,
+        username: mockUser.username,
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            email: mockUser.email,
+            username: mockUser.username,
+          },
+        }),
+      );
+      expect(result).toHaveLength(1);
+    });
+
+    it('should apply pagination and filters together', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+      prisma.user.count = jest.fn().mockResolvedValue(1);
+
+      await service.get({
+        ...defaultFields,
+        withPagination: true,
+        email: mockUser.email,
+        page: 1,
+        pageSize: 1,
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { email: mockUser.email },
+          skip: 0,
+          take: 1,
+        }),
+      );
+    });
+
+    it('should throw 400 for invalid pagination parameters', async () => {
+      await expect(
+        service.get({
+          ...defaultFields,
+          withPagination: true,
+          page: -1,
+          pageSize: 0,
+        }),
+      ).rejects.toThrow();
+    });
+
+    it('should support sorting', async () => {
+      const alice = { ...mockUser, firstName: 'Alice' };
+      const john = { ...mockUser, firstName: 'John' };
+
+      prisma.user.findMany = jest.fn().mockResolvedValue([alice, john]);
+
+      await service.get({
+        ...defaultFields,
+        sortBy: 'firstName',
+        sortOrder: 'asc',
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { firstName: 'asc' },
+        }),
+      );
+    });
+
+    it('should return only active users', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+
+      await service.get({ ...defaultFields, isActive: true });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { isActive: true },
+        }),
+      );
+    });
+
+    it('should filter by term', async () => {
+      prisma.user.findMany = jest.fn().mockResolvedValue([mockUser]);
+
+      const result = await service.get({ ...defaultFields, term: 'john' });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            OR: [
+              { firstName: { contains: 'john', mode: 'insensitive' } },
+              { lastName: { contains: 'john', mode: 'insensitive' } },
+              { email: { contains: 'john', mode: 'insensitive' } },
+              { username: { contains: 'john', mode: 'insensitive' } },
+            ],
+          },
+        }),
+      );
     });
   });
 
