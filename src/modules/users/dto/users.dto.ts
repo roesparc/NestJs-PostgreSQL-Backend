@@ -220,11 +220,11 @@ export class GetUsersDto {
   @IsOptional()
   @IsString({ each: true })
   @ToArray()
-  @IsIn(ALL_FIELDS, { each: true })
+  @IsIn(SORTABLE_FIELDS, { each: true })
   @ApiProperty({
     description: 'Select specific fields to return',
     type: [String],
-    enum: ALL_FIELDS,
+    enum: SORTABLE_FIELDS,
     required: false,
   })
   field?: string[];
