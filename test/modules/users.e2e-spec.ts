@@ -89,6 +89,139 @@ describe('Users', () => {
         })
         .expect(400);
     });
+
+    it('should reject when required fields are missing', async () => {
+      const payload = {
+        lastName: 'Doe',
+      };
+
+      const res = await request(app.getHttpServer())
+        .post('/users')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('firstName should not be empty'),
+          expect.stringContaining('email should not be empty'),
+          expect.stringContaining('username should not be empty'),
+          expect.stringContaining('password should not be empty'),
+        ]),
+      );
+    });
+
+    it('should reject invalid email format', async () => {
+      const payload = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'notanemail',
+        username: 'johndoe123',
+        password: 'Pass123!',
+      };
+
+      const res = await request(app.getHttpServer())
+        .post('/users')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('email must be an email'),
+        ]),
+      );
+    });
+
+    it('should reject password shorter than 8 characters', async () => {
+      const payload = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe123',
+        password: 'Pass1!',
+      };
+
+      const res = await request(app.getHttpServer())
+        .post('/users')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(
+            'password must be longer than or equal to 8 characters',
+          ),
+        ]),
+      );
+    });
+
+    it('should reject password without required complexity', async () => {
+      const payload = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe123',
+        password: 'password123',
+      };
+
+      const res = await request(app.getHttpServer())
+        .post('/users')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(
+            'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character',
+          ),
+        ]),
+      );
+    });
+
+    it('should reject username shorter than 3 characters', async () => {
+      const payload = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'jo',
+        password: 'Pass123!',
+      };
+
+      const res = await request(app.getHttpServer())
+        .post('/users')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(
+            'username must be longer than or equal to 3 characters',
+          ),
+        ]),
+      );
+    });
+
+    it('should reject first name shorter than 3 characters', async () => {
+      const payload = {
+        firstName: 'Al',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe123',
+        password: 'Pass123!',
+      };
+
+      const res = await request(app.getHttpServer())
+        .post('/users')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(
+            'firstName must be longer than or equal to 3 characters',
+          ),
+        ]),
+      );
+    });
   });
 
   describe('GET /users', () => {
@@ -482,6 +615,42 @@ describe('Users', () => {
         .expect(200);
     });
 
+    it('should reject password shorter than 8 characters', async () => {
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .patch(`/users/update-password/${testUser.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ password: 'Pass1!' })
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(
+            'password must be longer than or equal to 8 characters',
+          ),
+        ]),
+      );
+    });
+
+    it('should reject password without required complexity', async () => {
+      const token = await loginAs(app, testUser);
+
+      const res = await request(app.getHttpServer())
+        .patch(`/users/update-password/${testUser.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ password: 'password123' })
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(
+            'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character',
+          ),
+        ]),
+      );
+    });
+
     it("should forbid user from updating another user's password", async () => {
       const otherUser = await createTestUser(prisma, {
         email: 'other@example.com',
@@ -492,7 +661,7 @@ describe('Users', () => {
       const res = await request(app.getHttpServer())
         .patch(`/users/update-password/${otherUser.id}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ password: 'HackPass!' })
+        .send({ password: 'HackPass123!' })
         .expect(403);
 
       expect(res.body.message).toContain('permission');
@@ -504,7 +673,7 @@ describe('Users', () => {
       const res = await request(app.getHttpServer())
         .patch(`/users/update-password/999999`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ password: 'NewPass!' })
+        .send({ password: 'NewPass123!' })
         .expect(404);
 
       expect(res.body.message).toContain('not found');
