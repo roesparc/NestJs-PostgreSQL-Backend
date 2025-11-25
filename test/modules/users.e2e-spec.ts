@@ -117,6 +117,7 @@ describe('Users', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
+      expect(res.body[0]).not.toHaveProperty('hash');
     });
 
     it('should return paginated users', async () => {
@@ -134,6 +135,7 @@ describe('Users', () => {
       expect(res.body.pageSize).toBe(1);
       expect(res.body.pageCount).toBe(2);
       expect(Array.isArray(res.body.items)).toBe(true);
+      expect(res.body.items[0]).not.toHaveProperty('hash');
     });
 
     it('should filter users by id', async () => {
