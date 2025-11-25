@@ -51,6 +51,7 @@ export class RolesService {
     //#region Select & Include
     let select: any;
     let include: any;
+    let omit: any;
 
     if (query.field?.length) {
       select = {};
@@ -58,6 +59,7 @@ export class RolesService {
       if (query.includeUsers) select.users = true;
     } else {
       include = {};
+      omit = {};
       if (query.includeUsers) include.users = true;
     }
     //#endregion
@@ -69,7 +71,9 @@ export class RolesService {
           orderBy: { [query.sortBy]: query.sortOrder },
           skip: (query.page - 1) * query.pageSize,
           take: query.pageSize,
-          ...(select ? { select } : include ? { include } : {}),
+          ...(select && { select }),
+          ...(include && { include }),
+          ...(omit && { omit }),
         }),
 
         this.prisma[RolesService.model].count({ where }),
@@ -86,7 +90,9 @@ export class RolesService {
       return this.prisma[RolesService.model].findMany({
         where,
         orderBy: { [query.sortBy]: query.sortOrder },
-        ...(select ? { select } : include ? { include } : {}),
+        ...(select && { select }),
+        ...(include && { include }),
+        ...(omit && { omit }),
       });
     }
   }

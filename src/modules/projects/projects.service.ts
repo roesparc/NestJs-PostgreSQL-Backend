@@ -83,6 +83,7 @@ export class ProjectsService {
     //#region Select & Include
     let select: any;
     let include: any;
+    let omit: any;
 
     if (query.field?.length) {
       select = {};
@@ -90,6 +91,7 @@ export class ProjectsService {
       if (query.includeUser) select.user = true;
     } else {
       include = {};
+      omit = {};
       if (query.includeUser) include.user = true;
     }
     //#endregion
@@ -101,7 +103,9 @@ export class ProjectsService {
           orderBy: { [query.sortBy]: query.sortOrder },
           skip: (query.page - 1) * query.pageSize,
           take: query.pageSize,
-          ...(select ? { select } : include ? { include } : {}),
+          ...(select && { select }),
+          ...(include && { include }),
+          ...(omit && { omit }),
         }),
 
         this.prisma[ProjectsService.model].count({ where }),
@@ -118,7 +122,9 @@ export class ProjectsService {
       return this.prisma[ProjectsService.model].findMany({
         where,
         orderBy: { [query.sortBy]: query.sortOrder },
-        ...(select ? { select } : include ? { include } : {}),
+        ...(select && { select }),
+        ...(include && { include }),
+        ...(omit && { omit }),
       });
     }
   }
