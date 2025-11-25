@@ -12,6 +12,7 @@ import {
   IsDateString,
   IsIn,
   Min,
+  Matches,
 } from 'class-validator';
 import { ToArray } from '../../../common/transformers/array.transformer';
 import { ToBoolean } from '../../../common/transformers/boolean.transformer';
@@ -53,8 +54,16 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(6)
-  @ApiProperty({ description: 'User password', required: true })
+  @MinLength(8)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/, {
+    message:
+      'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character',
+  })
+  @ApiProperty({
+    description:
+      'User password; must have upper, lower, number, special char, min length 8',
+    required: true,
+  })
   password!: string;
 }
 
