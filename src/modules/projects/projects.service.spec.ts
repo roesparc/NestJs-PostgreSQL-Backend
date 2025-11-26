@@ -207,6 +207,54 @@ describe('ProjectsService', () => {
       expect(result[0].user).toBeDefined();
     });
 
+    it('should filter by slug', async () => {
+      prisma.project.findMany = jest.fn().mockResolvedValue([mockProject]);
+
+      const slug = 'test-slug';
+
+      await service.get({ ...defaultFields, slug });
+
+      expect(prisma.project.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            slug,
+          },
+        }),
+      );
+    });
+
+    it('should filter by featured status', async () => {
+      prisma.project.findMany = jest.fn().mockResolvedValue([mockProject]);
+
+      const featured = true;
+
+      await service.get({ ...defaultFields, featured });
+
+      expect(prisma.project.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            featured,
+          },
+        }),
+      );
+    });
+
+    it('should filter by tech stack', async () => {
+      prisma.project.findMany = jest.fn().mockResolvedValue([mockProject]);
+
+      const techStack = ['NestJS', 'TypeScript'];
+
+      await service.get({ ...defaultFields, techStack });
+
+      expect(prisma.project.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            techStack: { hasSome: techStack },
+          },
+        }),
+      );
+    });
+
     it('should filter by term', async () => {
       prisma.project.findMany = jest.fn().mockResolvedValue([mockProject]);
 
