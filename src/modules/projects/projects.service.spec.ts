@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
-import { NotFoundException } from '@nestjs/common';
 import { Project, User } from '@prisma/client';
 import { ProjectsService } from './projects.service';
 import { ReqUser } from '../../shared/interfaces/request.interface';
+import { CreateProjectDto } from './dto/projects.dto';
 
 describe('ProjectsService', () => {
   let service: ProjectsService;
@@ -63,7 +63,7 @@ describe('ProjectsService', () => {
   });
 
   describe('create', () => {
-    const dto = {
+    const dto: CreateProjectDto = {
       title: 'Test Project',
       slug: 'test-project',
       techStack: ['NestJS', 'TypeScript', 'PostgreSQL'],
