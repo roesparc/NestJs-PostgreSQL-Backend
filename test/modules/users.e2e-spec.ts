@@ -38,22 +38,15 @@ describe('Users', () => {
   beforeEach(async () => {
     await cleanDatabase(prisma);
 
-    const [testUserRes, adminUserRes] = await Promise.all([
+    [testUser, { user: adminUser, role: adminRole }] = await Promise.all([
       createTestUser(prisma),
       createAdminUser(prisma),
     ]);
 
-    testUser = testUserRes;
-    adminUser = adminUserRes.user;
-    adminRole = adminUserRes.role;
-
-    const [testUserTokenRes, adminUserTokenRes] = await Promise.all([
+    [testUserToken, adminUserToken] = await Promise.all([
       loginAs(app, testUser),
       loginAs(app, adminUser),
     ]);
-
-    testUserToken = testUserTokenRes;
-    adminUserToken = adminUserTokenRes;
   });
 
   afterAll(async () => {
