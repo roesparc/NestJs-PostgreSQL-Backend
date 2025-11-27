@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto/roles.dto';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class RolesService {
 
   async get(query: GetRolesDto): Promise<Role[] | PaginatedResponse<Role>> {
     //#region Filters
-    const where: any = {};
+    const where: Prisma.RoleWhereInput = {};
 
     if (query.id?.length) where.id = { in: query.id };
 
@@ -49,9 +49,9 @@ export class RolesService {
     //#endregion
 
     //#region Select & Include
-    let select: any;
-    let include: any;
-    let omit: any;
+    let select: Prisma.RoleSelect | undefined;
+    let include: Prisma.RoleInclude | undefined;
+    let omit: Prisma.RoleOmit | undefined;
 
     if (query.field?.length) {
       select = {};

@@ -16,6 +16,7 @@ import {
 import { UserProfile, UserWithoutHash } from './interfaces/users.interface';
 import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
 import { ReqUser } from '../../shared/interfaces/request.interface';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -57,7 +58,7 @@ export class UsersService {
     query: GetUsersDto,
   ): Promise<UserWithoutHash[] | PaginatedResponse<UserWithoutHash>> {
     //#region Filters
-    const where: any = {};
+    const where: Prisma.UserWhereInput = {};
 
     if (query.id?.length) where.id = { in: query.id };
     if (query.username) where.username = query.username;
@@ -90,9 +91,9 @@ export class UsersService {
     //#endregion
 
     //#region Select & Include
-    let select: any;
-    let include: any;
-    let omit: any;
+    let select: Prisma.UserSelect | undefined;
+    let include: Prisma.UserInclude | undefined;
+    let omit: Prisma.UserOmit | undefined;
 
     if (query.field?.length) {
       select = {};

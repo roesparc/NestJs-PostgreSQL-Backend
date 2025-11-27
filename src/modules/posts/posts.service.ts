@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePostDto, GetPostsDto, UpdatePostDto } from './dto/posts.dto';
-import { Post } from '@prisma/client';
+import { Post, Prisma } from '@prisma/client';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
 import { ReqUser } from '../../shared/interfaces/request.interface';
@@ -44,7 +44,7 @@ export class PostsService {
 
   async get(query: GetPostsDto): Promise<Post[] | PaginatedResponse<Post>> {
     //#region Filters
-    const where: any = {};
+    const where: Prisma.PostWhereInput = {};
 
     if (query.id?.length) where.id = { in: query.id };
     if (query.authorId?.length) where.authorId = { in: query.authorId };
@@ -66,9 +66,9 @@ export class PostsService {
     //#endregion
 
     //#region Select & Include
-    let select: any;
-    let include: any;
-    let omit: any;
+    let select: Prisma.PostSelect | undefined;
+    let include: Prisma.PostInclude | undefined;
+    let omit: Prisma.PostOmit | undefined;
 
     if (query.field?.length) {
       select = {};

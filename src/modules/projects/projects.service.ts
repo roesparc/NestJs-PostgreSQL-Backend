@@ -10,7 +10,7 @@ import {
   GetProjectsDto,
   UpdateProjectDto,
 } from './dto/projects.dto';
-import { Project } from '@prisma/client';
+import { Prisma, Project } from '@prisma/client';
 import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 import { ReqUser } from '../../shared/interfaces/request.interface';
@@ -51,7 +51,7 @@ export class ProjectsService {
     query: GetProjectsDto,
   ): Promise<Project[] | PaginatedResponse<Project>> {
     //#region Filters
-    const where: any = {};
+    const where: Prisma.ProjectWhereInput = {};
 
     if (query.id?.length) where.id = { in: query.id };
     if (query.userId?.length) where.userId = { in: query.userId };
@@ -81,9 +81,9 @@ export class ProjectsService {
     //#endregion
 
     //#region Select & Include
-    let select: any;
-    let include: any;
-    let omit: any;
+    let select: Prisma.ProjectSelect | undefined;
+    let include: Prisma.ProjectInclude | undefined;
+    let omit: Prisma.ProjectOmit | undefined;
 
     if (query.field?.length) {
       select = {};
