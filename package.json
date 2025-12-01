@@ -1,8 +1,7 @@
 {
-  "name": "NestJs-Backend",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "nestjs-postgresql-backend",
+  "version": "1.0.0",
+  "author": "Rodrigo Espinosa Arcega",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

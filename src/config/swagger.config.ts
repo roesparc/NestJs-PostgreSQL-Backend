@@ -3,9 +3,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export default function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
-    .setTitle('NESTJS BACKEND')
-    .setDescription('API documentation')
-    .setVersion('1.0')
+    .setTitle('NestJs + PostgreSQL Backend')
+    .setDescription('Developed by Rodrigo Espinosa Arcega')
+    .setExternalDoc(
+      'GitHub Repository',
+      'https://github.com/roesparc/NestJs-Backend',
+    )
+    .setVersion('1.0.0')
     .addBearerAuth() // adds JWT authentication for endpoints
     .build();
 
