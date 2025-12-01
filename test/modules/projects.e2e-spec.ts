@@ -188,21 +188,6 @@ describe('Projects', () => {
       expect(res.body.message).toContain('slug should not be empty');
     });
 
-    it('should default techStack to empty array if omitted', async () => {
-      const dto: CreateProjectDto = {
-        title: 'No Tech Stack',
-        slug: 'no-tech-stack',
-      };
-
-      const res = await request(app.getHttpServer())
-        .post('/projects')
-        .set('Authorization', `Bearer ${testUserToken}`)
-        .send(dto)
-        .expect(201);
-
-      expect(res.body.techStack).toEqual([]);
-    });
-
     it('should reject techStack when not array of strings', async () => {
       const dto: any = {
         title: 'Bad Tech Stack',
@@ -509,7 +494,7 @@ describe('Projects', () => {
       );
     });
 
-    it('should not modify fields not provided', async () => {
+    it('should only update fields provided', async () => {
       const res = await request(app.getHttpServer())
         .patch(`/projects/id/${testUserProject.id}`)
         .set('Authorization', `Bearer ${testUserToken}`)

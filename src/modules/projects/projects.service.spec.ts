@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ProjectsService } from './projects.service';
 import { ReqUser } from '../../shared/interfaces/request.interface';
-import { CreateProjectDto } from './dto/projects.dto';
+import { CreateProjectDto, UpdateProjectDto } from './dto/projects.dto';
 import { Project, User } from 'src/generated/prisma/client';
 
 describe('ProjectsService', () => {
@@ -98,23 +98,6 @@ describe('ProjectsService', () => {
       );
 
       expect(prisma.project.create).not.toHaveBeenCalled();
-    });
-
-    it('should default techStack to empty array if omitted', async () => {
-      prisma.project.findFirst = jest.fn().mockResolvedValue(null);
-      prisma.project.create = jest.fn().mockResolvedValue(mockProject);
-
-      const { techStack, ...rest } = dto;
-
-      await service.create(mockReqUser, rest);
-
-      expect(prisma.project.create).toHaveBeenCalledWith({
-        data: {
-          ...dto,
-          userId: mockReqUser.id,
-          techStack: [],
-        },
-      });
     });
   });
 
@@ -377,9 +360,14 @@ describe('ProjectsService', () => {
     const id = 1;
 
     it('should update a project successfully', async () => {
-      const dto = {
+      const dto: UpdateProjectDto = {
         title: 'Updated Title',
+        slug: 'updated-slug',
         description: 'Updated description',
+        repoUrl: 'https://github.com/diana/updated-project',
+        demoUrl: 'https://updated-project.example.com',
+        techStack: ['Updated Technology', 'Test'],
+        featured: true,
       };
 
       const updatedProject = { ...mockProject, ...dto };
@@ -396,11 +384,7 @@ describe('ProjectsService', () => {
 
       expect(prisma.project.update).toHaveBeenCalledWith({
         where: { id },
-        data: {
-          ...dto,
-          slug: mockProject.slug,
-          techStack: mockProject.techStack,
-        },
+        data: dto,
       });
 
       expect(result).toEqual(updatedProject);
@@ -445,45 +429,22 @@ describe('ProjectsService', () => {
       expect(prisma.project.update).not.toHaveBeenCalled();
     });
 
-    it('should allow slug change when slug is unique', async () => {
-      const dto = { slug: 'unique-slug' };
+    it('should only update fields provided', async () => {
+      const dto: UpdateProjectDto = {
+        description: 'Updated description',
+        featured: true,
+      };
 
       prisma.project.findUnique = jest.fn().mockResolvedValue(mockProject);
       prisma.project.findFirst = jest.fn().mockResolvedValue(null);
       prisma.project.update = jest.fn().mockResolvedValue(mockProject);
 
-      const result = await service.updateById(mockReqUser, id, dto);
+      await service.updateById(mockReqUser, id, dto);
 
       expect(prisma.project.update).toHaveBeenCalledWith({
         where: { id },
-        data: {
-          slug: dto.slug,
-          techStack: mockProject.techStack,
-        },
+        data: dto,
       });
-    });
-
-    it('should update techStack when provided', async () => {
-      const dto = { techStack: ['Node', 'React'] };
-
-      prisma.project.findUnique = jest.fn().mockResolvedValue(mockProject);
-      prisma.project.findFirst = jest.fn().mockResolvedValue(null);
-      prisma.project.update = jest.fn().mockResolvedValue({
-        ...mockProject,
-        techStack: dto.techStack,
-      });
-
-      const result = await service.updateById(mockReqUser, id, dto);
-
-      expect(prisma.project.update).toHaveBeenCalledWith({
-        where: { id },
-        data: {
-          slug: mockProject.slug,
-          techStack: dto.techStack,
-        },
-      });
-
-      expect(result.techStack).toEqual(dto.techStack);
     });
   });
 
