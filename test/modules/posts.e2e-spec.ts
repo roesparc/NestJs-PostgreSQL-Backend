@@ -486,7 +486,7 @@ describe('Posts', () => {
       );
     });
 
-    it('should not modify fields not provided', async () => {
+    it('should only update fields provided', async () => {
       const response = await request(app.getHttpServer())
         .patch(`/posts/id/${testUserPost.id}`)
         .set('Authorization', `Bearer ${testUserToken}`)

@@ -333,7 +333,9 @@ describe('PostsService', () => {
     it('should update a post successfully', async () => {
       const dto: UpdatePostDto = {
         title: 'Updated Title',
+        slug: 'updated-slug',
         content: 'Updated Content',
+        published: false,
       };
 
       const updatedPost = { ...mockPost, ...dto };
@@ -350,10 +352,7 @@ describe('PostsService', () => {
 
       expect(prisma.post.update).toHaveBeenCalledWith({
         where: { id },
-        data: {
-          ...dto,
-          slug: mockPost.slug,
-        },
+        data: dto,
       });
 
       expect(result).toEqual(updatedPost);
@@ -398,26 +397,22 @@ describe('PostsService', () => {
       expect(prisma.post.update).not.toHaveBeenCalled();
     });
 
-    it('should allow slug change when unique', async () => {
-      const dto = { slug: 'unique-slug' };
+    it('should only update fields provided', async () => {
+      const dto: UpdatePostDto = {
+        content: 'Updated content',
+        published: true,
+      };
 
       prisma.post.findUnique = jest.fn().mockResolvedValue(mockPost);
       prisma.post.findFirst = jest.fn().mockResolvedValue(null);
-      prisma.post.update = jest.fn().mockResolvedValue({
-        ...mockPost,
-        slug: dto.slug,
-      });
+      prisma.post.update = jest.fn().mockResolvedValue(mockPost);
 
-      const result = await service.updateById(mockReqUser, id, dto);
+      await service.updateById(mockReqUser, id, dto);
 
       expect(prisma.post.update).toHaveBeenCalledWith({
         where: { id },
-        data: {
-          slug: dto.slug,
-        },
+        data: dto,
       });
-
-      expect(result.slug).toBe(dto.slug);
     });
   });
 

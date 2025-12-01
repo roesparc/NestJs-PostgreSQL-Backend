@@ -21,7 +21,7 @@ export class PostsService {
 
   //#region CRUD
   async create(reqUser: ReqUser, payload: CreatePostDto): Promise<Post> {
-    const { slug, ...rest } = payload;
+    const { slug } = payload;
 
     const existingSlug = await this.prisma[PostsService.model].findFirst({
       where: { slug, authorId: reqUser.id },
@@ -35,8 +35,7 @@ export class PostsService {
 
     return this.prisma[PostsService.model].create({
       data: {
-        ...rest,
-        slug,
+        ...payload,
         authorId: reqUser.id,
       },
     });
@@ -135,7 +134,7 @@ export class PostsService {
       );
     }
 
-    const { slug, ...rest } = payload;
+    const { slug } = payload;
 
     if (slug && slug !== entity.slug) {
       const existingSlug = await this.prisma[PostsService.model].findFirst({
@@ -151,10 +150,7 @@ export class PostsService {
 
     return this.prisma[PostsService.model].update({
       where: { id },
-      data: {
-        ...rest,
-        slug: slug ?? entity.slug,
-      },
+      data: payload,
     });
   }
 
