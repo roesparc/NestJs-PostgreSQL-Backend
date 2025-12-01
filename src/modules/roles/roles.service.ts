@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto/roles.dto';
-import { Prisma, Role } from '@prisma/client';
 import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
+import { Prisma, Role } from 'src/generated/prisma/client';
 
 @Injectable()
 export class RolesService {

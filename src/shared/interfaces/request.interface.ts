@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { Role, User } from '@prisma/client';
+import { Role, User } from 'src/generated/prisma/client';
 
 export interface ReqUser extends Omit<User, 'hash'> {
   roles: Role[];

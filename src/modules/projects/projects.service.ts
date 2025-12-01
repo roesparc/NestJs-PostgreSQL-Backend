@@ -10,11 +10,11 @@ import {
   GetProjectsDto,
   UpdateProjectDto,
 } from './dto/projects.dto';
-import { Prisma, Project } from '@prisma/client';
 import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 import { ReqUser } from '../../shared/interfaces/request.interface';
 import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
+import { Prisma, Project } from 'src/generated/prisma/client';
 
 @Injectable()
 export class ProjectsService {

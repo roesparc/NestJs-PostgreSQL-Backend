@@ -4,12 +4,12 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { cleanDatabase } from '../helpers/database.helper';
-import { PrismaClient, Role, User } from '@prisma/client';
 import {
   createAdminUser,
   createTestUser,
   loginAs,
 } from '../helpers/user-auth.helper';
+import { PrismaClient, Role, User } from 'src/generated/prisma/client';
 
 async function createTestRoles(
   prisma: PrismaClient,

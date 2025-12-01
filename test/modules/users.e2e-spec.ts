@@ -11,7 +11,7 @@ import {
   loginAs,
   testPassword,
 } from '../helpers/user-auth.helper';
-import { Role, User } from '@prisma/client';
+import { Role, User } from 'src/generated/prisma/client';
 
 describe('Users', () => {
   let app: INestApplication;

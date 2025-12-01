@@ -1,8 +1,8 @@
-import { PrismaClient, Role, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../../src/modules/users/dto/users.dto';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { PrismaClient, Role, User } from 'src/generated/prisma/client';
 
 export const testPassword = 'Test123!';
 

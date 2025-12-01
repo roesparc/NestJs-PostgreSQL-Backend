@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { ToBoolean } from '../../../common/transformers/boolean.transformer';
 import { ToArray } from '../../../common/transformers/array.transformer';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'src/generated/prisma/client';
 
 const ALL_FIELDS = Object.values(Prisma.PostScalarFieldEnum);
 const SORTABLE_FIELDS = ALL_FIELDS.filter(

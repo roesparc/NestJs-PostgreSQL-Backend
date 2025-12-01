@@ -1,4 +1,4 @@
-import { Post, Project, Role, User } from '@prisma/client';
+import { Post, Project, Role, User } from 'src/generated/prisma/client';
 
 export interface UserWithoutHash extends Omit<User, 'hash'> {}
 

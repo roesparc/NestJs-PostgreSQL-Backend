@@ -5,7 +5,7 @@ import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { cleanDatabase } from '../helpers/database.helper';
 import { createTestUser, testPassword } from '../helpers/user-auth.helper';
-import { User } from '@prisma/client';
+import { User } from 'src/generated/prisma/client';
 
 describe('Auth', () => {
   let app: INestApplication;

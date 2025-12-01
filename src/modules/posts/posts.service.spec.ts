@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Post, User } from '@prisma/client';
 import { ReqUser } from '../../shared/interfaces/request.interface';
 import { PostsService } from './posts.service';
 import { CreatePostDto, UpdatePostDto } from './dto/posts.dto';
+import { Post, User } from 'src/generated/prisma/client';
 
 describe('PostsService', () => {
   let service: PostsService;

@@ -4,7 +4,6 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { cleanDatabase } from '../helpers/database.helper';
-import { PrismaClient, Project, User } from '@prisma/client';
 import {
   createAdminUser,
   createTestUser,
@@ -14,6 +13,7 @@ import {
   CreateProjectDto,
   UpdateProjectDto,
 } from '../../src/modules/projects/dto/projects.dto';
+import { PrismaClient, Project, User } from 'src/generated/prisma/client';
 
 async function createTestProjects(
   prisma: PrismaClient,

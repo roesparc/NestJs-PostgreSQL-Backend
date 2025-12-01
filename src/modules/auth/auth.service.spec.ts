@@ -4,7 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { User } from 'src/generated/prisma/client';
 
 jest.mock('bcrypt');
 

@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePostDto, GetPostsDto, UpdatePostDto } from './dto/posts.dto';
-import { Post, Prisma } from '@prisma/client';
 import { CheckSlugDto } from '../../shared/dto/slug.dto';
 import { CheckSlugResponse } from '../../shared/interfaces/slug.interface';
 import { ReqUser } from '../../shared/interfaces/request.interface';
 import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
+import { Post, Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class PostsService {

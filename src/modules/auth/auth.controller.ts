@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { AppLogger } from '../../common/logger/logger.service';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -22,7 +22,6 @@ export class AuthController {
     status: 401,
     description: 'Invalid credentials or user account is disabled',
   })
-  @ApiBody({ type: LoginDto })
   async login(@Body() payload: LoginDto) {
     const { identifier, password } = payload;
 

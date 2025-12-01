@@ -1,11 +1,12 @@
-generator client {
-    provider = "prisma-client-js"
-}
-
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL")
     schemas  = ["auth", "content"]
+}
+
+generator client {
+    provider     = "prisma-client"
+    output       = "../src/generated/prisma"
+    moduleFormat = "cjs"
 }
 
 //#region AUTH SCHEMA
@@ -40,7 +41,6 @@ model Role {
     @@map("roles")
     @@schema("auth")
 }
-
 //#endregion
 
 //#region CONTENT SCHEMA

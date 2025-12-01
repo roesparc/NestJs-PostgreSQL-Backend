@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Project, User } from '@prisma/client';
 import { ProjectsService } from './projects.service';
 import { ReqUser } from '../../shared/interfaces/request.interface';
 import { CreateProjectDto } from './dto/projects.dto';
+import { Project, User } from 'src/generated/prisma/client';
 
 describe('ProjectsService', () => {
   let service: ProjectsService;

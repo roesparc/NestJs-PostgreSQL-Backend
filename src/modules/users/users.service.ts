@@ -16,7 +16,7 @@ import {
 import { UserProfile, UserWithoutHash } from './interfaces/users.interface';
 import { PaginatedResponse } from '../../shared/interfaces/paginated-response.interface';
 import { ReqUser } from '../../shared/interfaces/request.interface';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class UsersService {

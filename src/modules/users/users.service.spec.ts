@@ -7,10 +7,9 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/users.dto';
 import { ReqUser } from '../../shared/interfaces/request.interface';
-import { disconnect } from 'process';
+import { User } from 'src/generated/prisma/client';
 
 jest.mock('bcrypt');
 
