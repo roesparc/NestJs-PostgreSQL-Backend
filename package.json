@@ -13,7 +13,7 @@
     "prisma:migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
     "prisma:migrate:deploy:dev": "dotenv -e .env.development -- prisma migrate deploy",
     "prisma:migrate:deploy:test": "dotenv -e .env.test -- prisma migrate deploy",
-    "prisma:migrate:deploy:prod": "dotenv -e .env.production -- prisma migrate deploy",
+    "prisma:migrate:deploy:prod": "dotenv -e .env.production.migrate -- prisma migrate deploy",
     "prisma:seed:dev": "dotenv -e .env.development -- prisma db seed",
     "prisma:seed:prod": "dotenv -e .env.production -- prisma db seed",
     "prisma:studio:dev": "dotenv -e .env.development -- prisma studio",
