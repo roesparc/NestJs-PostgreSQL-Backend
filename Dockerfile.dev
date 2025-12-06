@@ -1,0 +1,21 @@
+FROM node:22
+
+WORKDIR /app
+
+# Disable TLS verification for Prisma + Node
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE=1
+ENV GIT_SSL_NO_VERIFY=1
+ENV SSL_CERT_FILE=
+
+# Disable TLS verification for npm
+RUN npm config set strict-ssl false
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start:dev"]
