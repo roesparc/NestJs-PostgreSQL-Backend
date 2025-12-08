@@ -2,25 +2,28 @@ services:
   api:
     container_name: nest_dev
     build:
-      context: .
+      context: ./
       dockerfile: Dockerfile.dev
+    develop:
+      watch:
+        - path: ./src
+          action: sync
+          target: /app/src
+        - path: ./package.json
+          action: rebuild
+    env_file:
+      - .env.development
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       - db
-    command: npm run start:dev
 
   db:
     image: postgres:15
     container_name: postgres_dev
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: npb_dev_db
+    env_file:
+      - .env.development
     ports:
       - "5432:5432"
     volumes:
