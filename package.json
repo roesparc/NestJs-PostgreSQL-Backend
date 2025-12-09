@@ -27,7 +27,8 @@
     "docker:dev": "docker compose -f docker-compose.dev.yml watch",
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build",
     "docker:down:dev": "docker compose -f docker-compose.dev.yml down",
-    "docker:down:prod": "docker compose -f docker-compose.prod.yml down"
+    "docker:down:prod": "docker compose -f docker-compose.prod.yml down",
+    "docker:prisma:studio": "prisma studio --browser none"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
