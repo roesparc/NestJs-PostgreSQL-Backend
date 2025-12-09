@@ -23,11 +23,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "dotenv -e .env.test -- cross-env NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json --runInBand",
-    "docker:dev": "docker compose -f docker-compose.dev.yml watch",
-    "docker:prod": "docker compose -f docker-compose.prod.yml up --build",
-    "docker:down:dev": "docker compose -f docker-compose.dev.yml down",
-    "docker:down:prod": "docker compose -f docker-compose.prod.yml down",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
+    "docker:dev": "docker compose -f docker/dev/compose.yml watch",
+    "docker:prod": "docker compose -f docker/prod/compose.yml up --build",
+    "docker:down:dev": "docker compose -f docker/dev/compose.yml down",
+    "docker:down:prod": "docker compose -f docker/prod/compose.yml down",
     "docker:prisma:studio": "prisma studio --browser none"
   },
   "dependencies": {
