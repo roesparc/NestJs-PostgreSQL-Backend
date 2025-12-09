@@ -6,7 +6,7 @@ services:
       dockerfile: docker/dev/Dockerfile
     develop:
       watch:
-        - path: ./src
+        - path: ../../src
           action: sync
           target: /app/src
         - path: ./package.json
