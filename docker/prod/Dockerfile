@@ -23,4 +23,4 @@ COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma generate && node dist/main.js"]
+CMD ["node", "dist/main.js"]
