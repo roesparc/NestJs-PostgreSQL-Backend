@@ -1,0 +1,64 @@
+name: npb_dev
+
+services:
+  init:
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npx prisma db seed"
+    build:
+      context: ../..
+      dockerfile: docker/dev/Dockerfile
+    env_file:
+      - .env.development
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    command: npm run start:dev
+    build:
+      context: ../..
+      dockerfile: docker/dev/Dockerfile
+    develop:
+      watch:
+        - path: ../../src
+          action: sync
+          target: /app/src
+        - path: ../../package.json
+          action: rebuild
+    env_file:
+      - .env.development
+    ports:
+      - "3000:3000"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
+  studio:
+    command: npx prisma studio --browser none
+    build:
+      context: ../..
+      dockerfile: docker/dev/Dockerfile
+    env_file:
+      - .env.development
+    ports:
+      - "51212:51212"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
+  db:
+    image: postgres:15
+    env_file:
+      - .env.development
+    ports:
+      - "5433:5432"
+    volumes:
+      - npb_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -U $$POSTGRES_USER"]
+      interval: 1s
+      retries: 20
+    restart: always
+
+volumes:
+  npb_test_data:
