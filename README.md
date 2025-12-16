@@ -1,10 +1,10 @@
 <div align="center">
   <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS Badge"/>
   <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL Badge"/>
-  <img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="Prisma Badge"/>
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Badge"/>
 </div>
 
-<h1 align="center">RESTful API with NestJS, PostgreSQL and Prisma </h1>
+<h1 align="center">RESTful API with NestJS, PostgreSQL and Docker </h1>
 
 ---
 
@@ -131,78 +131,129 @@ The <code>Users</code> module is a prime example of the project's adherence to m
 
 <h2>Getting Started</h2>
 
-<h3>Prerequisites</h3>
-<ul>
-  <li>Node.js</li>
-  <li>npm or yarn</li>
-  <li>PostgreSQL installed and running</li>
-</ul>
-
-<h3>Installation</h3>
-
-<ol>
-  <li>Clone the repository:
-    <pre><code>git clone https://github.com/roesparc/NestJs-PostgreSQL-Backend.git
-cd NestJs-PostgreSQL-Backend</code></pre>
-  </li>
-  <li>Install dependencies:
-    <pre><code>npm install
-# or
-yarn install</code></pre>
-  </li>
-  <li>
-    <strong>Configure Environment:</strong>
-    <p>
-      The repository includes <code>.env</code> files with default values. You must adjust the database connection string (<code>DATABASE_URL</code>) variable to match your PostgreSQL setup (<code>user</code>, <code>password</code>, <code>host</code>, and <code>port</code>).
-    </p>
-    <pre><code># example
-DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/database"</code></pre>
-  </li>
-  <li>
-    <strong>Run Prisma Migrations and Seed Database:</strong>
-    <p>Apply migrations and run the seed script to populate the database with initial data.</p>
-    <pre><code># development
-npm run prisma:migrate:deploy:dev
-npm run prisma:seed:dev</code></pre>
-
-<pre><code># production
-npm run prisma:migrate:deploy:prod
-npm run prisma:seed:prod</code></pre>
-  </li>
-</ol>
-
-<h3>Running the App</h3>
-
-<pre><code># development
-npm run start:dev</code></pre>
-
-<pre><code># production build
-npm run build
-npm run start:prod</code></pre>
 <p>
-The application will be accessible at <code>http://localhost:3000</code> (or the port defined in your configuration).
+  This project is designed to be run <strong>primarily using Docker</strong>, ensuring consistent environments across
+  <strong>development</strong>, <strong>testing</strong>, and <strong>production</strong>.
 </p>
 
-<h3>API Documentation (Swagger)</h3>
+<h3>Prerequisites</h3>
+<ul>
+  <li><strong>Docker Desktop</strong></li>
+</ul>
 
 <p>
-Once the application is running, the interactive API documentation is available at:
+  A local PostgreSQL installation is <strong>not required</strong>.
+</p>
+
+<h3>Environment Configuration</h3>
+
+<p>
+  Each environment is configured independently using <code>.env</code> files located under:
+</p>
+
+<pre><code>docker/
+ ├── dev/
+ │   └── .env
+ ├── test/
+ │   └── .env
+ └── prod/
+     └── .env</code></pre>
+
+<p>
+  Review and adjust these files as needed (ports, credentials, secrets, etc.).
+</p>
+
+<h3>Running the Application (Development)</h3>
+
+<p>
+  To start the application in <strong>development mode</strong> using Docker:
+</p>
+
+<pre><code>docker compose -f docker/dev/compose.yml watch</code></pre>
+
+<p>
+  This command will:
+</p>
+<ul>
+  <li>Build the development images</li>
+  <li>Start a PostgreSQL container</li>
+  <li>
+    Run the <strong>init</strong> service to:
+    <ul>
+      <li>Generate the Prisma client (<code>prisma generate</code>)</li>
+      <li>Apply database migrations (<code>prisma migrate deploy</code>)</li>
+      <li>Seed the database with initial data (<code>prisma db seed</code>)</li>
+    </ul>
+  </li>
+  <li>Start the NestJS application in <strong>watch mode</strong></li>
+  <li>Start a Prisma Studio container</li>
+  <li>Automatically reload the app on code changes</li>
+</ul>
+
+<p>
+  The API will be available at:
+</p>
+
+<pre><code>http://localhost:3000</code></pre>
+
+<p>
+  Swagger documentation is available at:
 </p>
 
 <p align="center">
   <a href="http://localhost:3000/docs"><code>http://localhost:3000/docs</code></a>
 </p>
 
----
-
-<h2>Testing</h2>
-
 <p>
-This project includes a comprehensive test suite to ensure reliability.
+  To stop and clean up the development environment:
 </p>
 
-<pre><code># run unit tests
-npm run test</code></pre>
+<pre><code>docker compose -f docker/dev/compose.yml down</code></pre>
 
-<pre><code># run e2e tests
-npm run test:e2e</code></pre>
+<h3>Running Tests (Docker)</h3>
+
+<p>
+  End-to-End tests are executed against an isolated Docker environment.
+</p>
+
+<pre><code>docker compose -f docker/test/compose.yml up</code></pre>
+
+<p>
+  This will:
+</p>
+<ul>
+  <li>Spin up a dedicated test database</li>
+  <li>Execute the Jest E2E test suite</li>
+</ul>
+
+<p>
+  After completion, bring the environment down:
+</p>
+
+<pre><code>docker compose -f docker/test/compose.yml down</code></pre>
+
+<h3>Prisma Utilities (Docker)</h3>
+
+<p>
+  Prisma commands can be executed inside the running development container.
+</p>
+
+<pre><code>docker compose -f docker/dev/compose.yml exec api npx jest</code></pre>
+
+<h3>Production</h3>
+
+<p>
+  A production-ready Dockerfile is available under:
+</p>
+
+<pre><code>docker/prod</code></pre>
+
+<p>
+  This setup runs a compiled NestJS build.
+</p>
+
+<p>
+  <em>
+    Production deployment is infrastructure-specific and should be adapted to the hosting or orchestration platform. For this project, the application was deployed on <strong>Render.com</strong> using <strong>Docker</strong> as the runtime environment.
+  </em>
+</p>
